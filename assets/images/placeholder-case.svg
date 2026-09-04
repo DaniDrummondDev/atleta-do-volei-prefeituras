@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800" role="img"
+  aria-label="Placeholder: registro fotográfico do município que utiliza a plataforma">
+  <rect width="1200" height="800" fill="#f1f2f3" />
+  <g stroke="#c3ccd6" stroke-width="3" fill="none">
+    <rect x="60" y="60" width="1080" height="680" rx="8" stroke-dasharray="14 12" />
+    <circle cx="600" cy="330" r="86" />
+    <path d="M540 396 L600 300 L660 396" />
+  </g>
+  <circle cx="600" cy="300" r="18" fill="#ff684d" />
+  <text x="600" y="500" text-anchor="middle" fill="#082f66" font-family="Manrope, DM Sans, sans-serif" font-size="34"
+    font-weight="800" letter-spacing="6">IMAGEM PLACEHOLDER</text>
+  <text x="600" y="546" text-anchor="middle" fill="#66758a" font-family="DM Sans, sans-serif" font-size="24">
+    Substituir pelo registro do município parceiro</text>
+</svg>

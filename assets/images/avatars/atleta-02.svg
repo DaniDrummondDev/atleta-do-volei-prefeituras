@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" role="img"
+  aria-label="Retrato ilustrado de atleta — imagem provisoria">
+  <defs><clipPath id="a2"><circle cx="50" cy="50" r="50"/></clipPath></defs>
+  <g clip-path="url(#a2)">
+    <rect width="100" height="100" fill="#f6ded7"/>
+    <path d="M8 100c3-20 20-28 42-28s39 8 42 28z" fill="#ff684d"/>
+    <path d="M41 56h18v16a9 9 0 0 1-18 0z" fill="#8d5524"/>
+    <circle cx="30" cy="46" r="4" fill="#8d5524"/><circle cx="70" cy="46" r="4" fill="#8d5524"/>
+    <ellipse cx="50" cy="43" rx="20" ry="23" fill="#a9673a"/>
+    <g fill="#1b1512"><circle cx="50" cy="26" r="16"/><circle cx="33" cy="36" r="10"/><circle cx="67" cy="36" r="10"/><circle cx="41" cy="22" r="11"/><circle cx="59" cy="22" r="11"/></g>
+    <ellipse cx="42.5" cy="43" rx="2.1" ry="2.4" fill="#2b2320"/>
+    <ellipse cx="57.5" cy="43" rx="2.1" ry="2.4" fill="#2b2320"/>
+    <g stroke="#1b1512" stroke-width="1.7" stroke-linecap="round" fill="none">
+      <path d="M38.5 37.5q4-2.4 8-.4"/><path d="M53.5 37.1q4-2 8 .4"/>
+    </g>
+    <path d="M50 45.5v4.5h2.6" stroke="#8d5524" stroke-width="1.5" stroke-linecap="round"
+      stroke-linejoin="round" fill="none"/>
+    <path d="M45 55.5q5 4.2 10 0" stroke="#96513f" stroke-width="1.9" stroke-linecap="round" fill="none"/>
+  </g>
+</svg>

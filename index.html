@@ -1,0 +1,593 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description"
+    content="Atleta do Vôlei para Prefeituras: organize eventos, conecte atletas, divulgue oportunidades e fortaleça a comunidade esportiva da sua cidade em uma única plataforma.">
+  <title>Atleta do Vôlei para Prefeituras</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"
+    integrity="sha512-h9FcoyWjHcOcmEVkxOfTLnmZFWIH0iZhZT1H2TbOq55xssQGEJHEaIm+PgoUaZbRvQTNTluNOEfb1ZRy6D3BOw=="
+    crossorigin="anonymous" referrerpolicy="no-referrer">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="animations.css">
+  <script>
+    /* Aplica `gsap-ready` cedo (antes do primeiro paint) para evitar
+       flash entre o layout estático e o animado. animations.js remove
+       esta classe se o GSAP não carregar — a página então volta 100%
+       ao comportamento original com .reveal + IntersectionObserver. */
+    (function () {
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.documentElement.classList.add('gsap-ready');
+      }
+    })();
+  </script>
+</head>
+
+<body>
+  <header class="site-header" id="inicio">
+    <div class="container nav-wrap">
+      <a class="brand" href="#inicio" aria-label="Atleta do Vôlei — início">
+        <img src="assets/images/logo-white.svg" alt="Atleta do Vôlei" width="739" height="200">
+      </a>
+      <button class="menu-toggle" aria-expanded="false" aria-controls="main-nav" aria-label="Abrir menu">
+        <span></span><span></span><span></span>
+      </button>
+      <nav id="main-nav" class="main-nav" aria-label="Navegação principal">
+        <a href="#ganhos">O que a prefeitura ganha</a>
+        <a href="#solucao">A solução</a>
+        <a href="#como-funciona">Como funciona</a>
+        <a href="#contato" class="button button-small">Falar com um especialista</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- 1. HERO -->
+    <section class="hero">
+      <div class="hero-pattern" aria-hidden="true"></div>
+      <div class="container hero-grid">
+        <div class="hero-copy reveal">
+          <p class="eyebrow light"><span></span> ATLETA DO VÔLEI PARA PREFEITURAS</p>
+          <h1>Transforme o vôlei <em>da sua cidade.</em></h1>
+          <p class="hero-lead">Organize eventos, conecte atletas, divulgue oportunidades e fortaleça a comunidade
+            esportiva em uma única plataforma — 100% dedicada ao vôlei e gratuita para o atleta.</p>
+          <div class="hero-actions">
+            <a href="#contato" class="button button-light">Falar com um especialista <span>↗</span></a>
+            <a href="#ganhos" class="text-link">Conheça a solução <span>↓</span></a>
+          </div>
+          <div class="hero-proof">
+            <div class="avatar-stack" aria-label="Comunidade de atletas">
+              <span>JL</span><span>MA</span><span>RC</span><span>+</span>
+            </div>
+            <p><strong>O aplicativo já existe e é gratuito</strong><br>para os atletas da sua cidade</p>
+          </div>
+        </div>
+        <div class="hero-visual reveal delay-1" aria-label="Demonstração do aplicativo">
+          <div class="orbit orbit-one"></div>
+          <div class="orbit orbit-two"></div>
+          <div class="floating-card card-event"><span class="card-icon">🏆</span>
+            <div><small>NOVO EVENTO</small><strong>Copa Municipal</strong></div>
+          </div>
+          <img class="hero-mockup" src="assets/images/mockup_01.svg"
+            alt="Telas do aplicativo Atleta do Vôlei apresentadas em um celular" width="687" height="1154">
+          <div class="floating-card card-connect">
+            <div class="mini-avatars"><i></i><i></i><i></i></div>
+            <div><strong>+48 conexões</strong><small>esta semana</small></div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-bottom"><span>↓</span> O QUE A PREFEITURA GANHA</div>
+    </section>
+
+    <!-- ================================================================
+         JORNADA HORIZONTAL — 4 painéis travados na mesma tela.
+         Ganhos → Desafio → Transformação → Posicionamento.
+
+         .journey (= .hscroll-viewport) é pinado; .journey-track desliza
+         em X. Cada <section> vira um painel de 100vw × 100vh.
+         Orquestração em animations.js §6 (initJourney).
+
+         Sem a classe `gsap-ready` no <html> estes wrappers são divs
+         neutros e as 4 seções voltam a empilhar verticalmente.
+         ================================================================ -->
+    <div class="journey hscroll-viewport" id="ganhos">
+      <div class="journey-track hscroll-track">
+
+        <!-- 2. O QUE A PREFEITURA GANHA -->
+        <section class="statement section journey-panel">
+          <div class="container narrow reveal">
+            <p class="eyebrow"><span></span> O QUE A PREFEITURA GANHA?</p>
+            <h2>Mais esporte. <span>Menos trabalho para a gestão.</span></h2>
+          </div>
+          <div class="container stats-grid">
+            <article class="stat-card reveal"><strong>01</strong>
+              <div class="stat-icon">⌁</div>
+              <h3>Organize</h3>
+              <p>Eventos, equipes e competições em um só lugar.</p>
+            </article>
+            <article class="stat-card featured reveal delay-1"><strong>02</strong>
+              <div class="stat-icon">◎</div>
+              <h3>Comunique</h3>
+              <p>Fale diretamente com atletas e equipes.</p>
+            </article>
+            <article class="stat-card reveal delay-2"><strong>03</strong>
+              <div class="stat-icon">↗</div>
+              <h3>Entenda</h3>
+              <p>Tenha uma visão mais estruturada da comunidade esportiva.</p>
+            </article>
+          </div>
+        </section>
+
+        <!-- 3. O PROBLEMA -->
+        <section class="problem section journey-panel">
+          <div class="container narrow reveal">
+            <p class="eyebrow"><span></span> O DESAFIO</p>
+            <h2>O esporte da cidade não acontece <span>só no campeonato.</span></h2>
+            <ul class="problem-list">
+              <li>Atletas precisam de informação.</li>
+              <li>Equipes precisam de organização.</li>
+              <li>Eventos precisam de divulgação.</li>
+              <li>A gestão precisa de dados.</li>
+            </ul>
+            <p class="problem-close"><strong>Tudo isso pode estar conectado.</strong></p>
+          </div>
+        </section>
+
+        <!-- 4. A GRANDE TRANSFORMAÇÃO -->
+        <section class="transform section journey-panel">
+          <div class="container">
+            <div class="center-head reveal">
+              <p class="eyebrow"><span></span> A GRANDE TRANSFORMAÇÃO <span></span></p>
+              <h2>De informações espalhadas<br><span>para uma plataforma só.</span></h2>
+            </div>
+            <div class="transform-grid">
+              <article class="transform-before reveal">
+                <small>ANTES</small>
+                <ul>
+                  <li>WhatsApp</li>
+                  <li>Planilhas</li>
+                  <li>Redes sociais</li>
+                  <li>Informações espalhadas</li>
+                </ul>
+              </article>
+              <i class="transform-arrow" aria-hidden="true">→</i>
+              <article class="transform-after reveal delay-1">
+                <small>COM ATLETA DO VÔLEI</small>
+                <p>Uma plataforma para organizar e conectar toda a comunidade do vôlei.</p>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4b. POSICIONAMENTO — não substitui o sistema da Secretaria -->
+        <section class="position section journey-panel">
+          <div class="container">
+            <div class="center-head reveal">
+              <p class="eyebrow"><span></span> POSICIONAMENTO <span></span></p>
+              <h2>Não é mais um sistema de gestão.<br><span>É o vôlei da cidade acontecendo.</span></h2>
+              <p class="position-lead">Sua Secretaria pode continuar com a solução generalista que já usa para administrar
+                todos os esportes. O Atleta do Vôlei entra por cima disso, para potencializar uma modalidade que já tem
+                comunidade, campeonatos e atletas próprios.</p>
+            </div>
+            <div class="position-grid reveal delay-1">
+              <article class="position-col">
+                <small>SISTEMA GENERALISTA DA SECRETARIA</small>
+                <ul>
+                  <li>Administra todos os esportes</li>
+                  <li>Usuário principal: o gestor</li>
+                  <li>Cadastros, documentos e relatórios</li>
+                  <li>Portal institucional</li>
+                  <li>Backoffice da gestão pública</li>
+                </ul>
+              </article>
+              <article class="position-col position-highlight">
+                <small>ATLETA DO VÔLEI</small>
+                <ul>
+                  <li>100% dedicado ao vôlei</li>
+                  <li>Usuário principal: atleta, equipe e organizador</li>
+                  <li>Feed, stories, perfis e chat</li>
+                  <li>Divulgação dentro da comunidade que joga</li>
+                  <li>Engajamento e operação especializada</li>
+                </ul>
+              </article>
+            </div>
+            <p class="position-quote reveal delay-2">“Uma prefeitura não precisa escolher entre administrar todos os
+              esportes e investir especificamente no vôlei.”</p>
+          </div>
+            </section>
+
+      </div><!-- /.journey-track -->
+
+      <!-- Orientação do usuário durante o pin: qual dos 4 painéis está
+           na tela. O item ativo e a barra são atualizados por
+           animations.js conforme o progresso horizontal. -->
+      <div class="journey-nav" aria-hidden="true">
+        <div class="journey-nav-rail"><i></i></div>
+        <ol>
+          <li>O que a prefeitura ganha</li>
+          <li>O desafio</li>
+          <li>A grande transformação</li>
+          <li>Posicionamento</li>
+        </ol>
+      </div>
+    </div><!-- /.journey -->
+
+    <!-- 5. O DIFERENCIAL -->
+    <section class="network section" id="solucao">
+      <div class="container network-grid">
+        <div class="network-visual reveal">
+          <div class="network-ring ring-a"></div>
+          <div class="network-ring ring-b"></div>
+          <div class="network-ring ring-c"></div>
+          <div class="network-center"><span>●</span><b>ATLETA DO<br>VÔLEI</b></div>
+          <div class="node node-athletes"><i>♙</i><b>ATLETAS</b><small>Perfil, nível de jogo e conexão com a
+              cidade</small></div>
+          <div class="node node-teams"><i>♟</i><b>EQUIPES</b><small>Formação, convites e comunicação em grupo</small>
+          </div>
+          <div class="node node-courts"><i>⌖</i><b>QUADRAS</b><small>Mapa, acesso e avaliação dos espaços</small></div>
+          <div class="node node-events"><i>♜</i><b>EVENTOS</b><small>Divulgação, inscrição e resultados</small></div>
+        </div>
+        <div class="network-copy reveal delay-1">
+          <p class="eyebrow light"><span></span> O GRANDE DIFERENCIAL</p>
+          <h2>A gestão organiza.<br><em>A rede social movimenta.</em></h2>
+          <p>Enquanto outras ferramentas terminam na tabela do campeonato, o Atleta do Vôlei continua criando relações
+            antes, durante e depois de cada jogo.</p>
+          <ul class="check-list">
+            <li><i>✓</i>
+              <div><strong>Perfis que viram oportunidades</strong><span>Atletas mostram nível, posição e
+                  conquistas.</span></div>
+            </li>
+            <li><i>✓</i>
+              <div><strong>Conteúdo que inspira participação</strong><span>Feed e stories dão voz à comunidade
+                  esportiva.</span></div>
+            </li>
+            <li><i>✓</i>
+              <div><strong>Conexões que permanecem</strong><span>Chat e grupos mantêm a cidade em movimento.</span>
+              </div>
+            </li>
+          </ul>
+          <a href="#contato" class="button button-coral">Falar com um especialista <span>→</span></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. NA PRÁTICA -->
+    <section class="practice section">
+      <!-- SCROLL HORIZONTAL #1 — ver §7 de animations.js.
+           .hscroll-viewport é pinado; .hscroll-track é transladado em X.
+           Sem a classe `gsap-ready` no <html> estes wrappers são divs
+           neutros e o .practice-grid volta ao grid de 4 colunas. -->
+      <div class="hscroll-viewport">
+        <div class="hscroll-inner">
+          <div class="container center-head hscroll-head reveal">
+            <p class="eyebrow"><span></span> NA PRÁTICA <span></span></p>
+            <h2>O que sua prefeitura <span>pode fazer?</span></h2>
+            <p class="hscroll-hint" aria-hidden="true">Role para o lado</p>
+          </div>
+          <div class="practice-grid hscroll-track">
+            <article class="practice-card reveal"><i>⌁</i>
+              <h3>Organizar</h3>
+              <p>Crie campeonatos, jogos e eventos.</p>
+            </article>
+            <article class="practice-card reveal delay-1"><i>◎</i>
+              <h3>Conectar</h3>
+              <p>Reúna atletas, equipes e organizadores.</p>
+            </article>
+            <article class="practice-card reveal delay-2"><i>◈</i>
+              <h3>Divulgar</h3>
+              <p>Leve eventos e oportunidades diretamente à comunidade.</p>
+            </article>
+            <article class="practice-card reveal delay-3"><i>↗</i>
+              <h3>Acompanhar</h3>
+              <p>Entenda melhor quem participa e movimenta o esporte.</p>
+            </article>
+          </div>
+        </div>
+      </div>
+      <div class="container">
+        <div class="dual-band reveal delay-2">
+          <article>
+            <small>PARA A PREFEITURA</small>
+            <p>Uma modalidade inteira organizada, comunicando-se e gerando dados — sem trocar o sistema que a Secretaria
+              já usa.</p>
+          </article>
+          <article>
+            <small>PARA O ATLETA</small>
+            <p>Um aplicativo gratuito para encontrar equipes, quadras, campeonatos e pessoas que jogam vôlei na própria
+              cidade.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. UMA PLATAFORMA COMPLETA -->
+    <section class="features section" id="como-funciona">
+      <div class="container">
+        <div class="section-head reveal">
+          <div>
+            <p class="eyebrow"><span></span> UMA PLATAFORMA COMPLETA</p>
+            <h2>Tudo que a gestão precisa.<br><span>Tudo que o atleta quer.</span></h2>
+          </div>
+          <p>Um ecossistema que une eficiência para a prefeitura e uma experiência que as pessoas realmente querem usar.
+          </p>
+        </div>
+        <div class="feature-grid">
+          <article class="feature-card feature-large reveal">
+            <div class="feature-num">01</div>
+            <div class="feature-icon">♟</div>
+            <h3>Gestão de equipes</h3>
+            <p>Cadastros, convites, escalações e comunicação centralizada para organizar melhor.</p>
+            <div class="mini-ui teams-ui"><span>Equipe Municipal</span>
+              <!-- PLACEHOLDER: retratos ilustrados. Substituir pelos rostos reais
+                   (mesmos nomes de arquivo em assets/images/avatars/). -->
+              <div class="avatar-row">
+                <img src="assets/images/avatars/atleta-01.svg" alt="" width="100" height="100" loading="lazy">
+                <img src="assets/images/avatars/atleta-02.svg" alt="" width="100" height="100" loading="lazy">
+                <img src="assets/images/avatars/atleta-03.svg" alt="" width="100" height="100" loading="lazy">
+                <img src="assets/images/avatars/atleta-04.svg" alt="" width="100" height="100" loading="lazy">
+                <b>+12</b>
+              </div>
+            </div>
+          </article>
+          <article class="feature-card reveal delay-1">
+            <div class="feature-num">02</div>
+            <div class="feature-icon">♜</div>
+            <h3>Campeonatos</h3>
+            <p>Crie torneios, gerencie inscrições, tabelas, resultados e rankings.</p>
+            <div class="bracket"><span>SEMIFINAL</span><b>4 × 2</b><span>FINAL</span><b class="coral">SÁB 16H</b></div>
+          </article>
+          <article class="feature-card coral-card reveal">
+            <div class="feature-num">03</div>
+            <div class="feature-icon">⌖</div>
+            <h3>Mapa de quadras</h3>
+            <p>Valorize os espaços da cidade e facilite o acesso da população.</p>
+            <!-- Mapa real (OpenStreetMap via Leaflet). A lógica fica em map.js.
+                 Hoje mostra a região de quem acessa; no futuro receberá as quadras
+                 vindas do banco do Atleta do Vôlei — ver window.atletaMap.addCourts(). -->
+            <div class="map-canvas" id="courts-map" role="application"
+              aria-label="Mapa da região de quem está acessando o site">
+              <p class="map-status" data-map-status>Carregando o mapa…</p>
+            </div>
+          </article>
+          <article class="feature-card feature-large social-card reveal delay-1">
+            <div class="feature-num">04</div>
+            <div class="feature-icon">◎</div>
+            <h3>Rede social do vôlei</h3>
+            <p>O diferencial que gera engajamento contínuo, pertencimento e visibilidade para o esporte local.</p>
+            <div class="social-ui">
+              <div class="story-row"><i></i><i></i><i></i><i></i></div>
+              <div class="feed-line"><i></i><span></span><b>♥</b></div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. BENEFÍCIOS -->
+    <section class="benefits section">
+      <div class="container benefits-grid">
+        <div class="benefit-image reveal">
+          <!-- PLACEHOLDER: trocar por foto final (rapaz vendo o app + quadra de parque desfocada ao fundo) -->
+          <img src="assets/images/placeholder-beneficios.svg"
+            alt="Placeholder da imagem final: pessoa usando o aplicativo Atleta do Vôlei em um parque" width="900"
+            height="1200" loading="lazy">
+          <div class="impact-badge"><strong>+ esporte</strong><small>+ conexão<br>+ cidade</small></div>
+        </div>
+        <div class="benefit-copy reveal delay-1">
+          <p class="eyebrow"><span></span> BENEFÍCIOS</p>
+          <h2>Por que levar o Atleta do Vôlei <span>para sua cidade?</span></h2>
+          <div class="benefit-list">
+            <article><b>01</b>
+              <div>
+                <h3>Mais participação</h3>
+                <p>Facilite o acesso da população às atividades esportivas e recupere quem não joga mais.</p>
+              </div>
+            </article>
+            <article><b>02</b>
+              <div>
+                <h3>Mais organização</h3>
+                <p>Centralize informações, equipes e eventos.</p>
+              </div>
+            </article>
+            <article><b>03</b>
+              <div>
+                <h3>Mais comunicação</h3>
+                <p>Tenha um canal direto com atletas e comunidade, divulgando ações esportivas para quem realmente quer
+                  participar.</p>
+              </div>
+            </article>
+            <article><b>04</b>
+              <div>
+                <h3>Mais visibilidade</h3>
+                <p>Dê visibilidade a atletas, projetos, professores e iniciativas da cidade.</p>
+              </div>
+            </article>
+            <article><b>05</b>
+              <div>
+                <h3>Mais dados</h3>
+                <p>Conheça melhor a comunidade e suas necessidades.</p>
+              </div>
+            </article>
+            <article><b>06</b>
+              <div>
+                <h3>Mais impacto</h3>
+                <p>Fortaleça a presença do esporte na vida da cidade.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9. COMO IMPLEMENTAMOS -->
+    <section class="steps section">
+      <!-- SCROLL HORIZONTAL #2 — mesma estrutura de "Na prática".
+           A .steps-progress é a trilha coral preenchida pela timeline. -->
+      <div class="hscroll-viewport">
+        <div class="steps-progress" aria-hidden="true"><i></i></div>
+        <div class="hscroll-inner">
+          <div class="container center-head hscroll-head reveal">
+            <p class="eyebrow"><span></span> COMO IMPLEMENTAMOS <span></span></p>
+            <h2>Sua prefeitura não precisa<br><span>começar do zero.</span></h2>
+            <p class="hscroll-hint" aria-hidden="true">Role para o lado</p>
+          </div>
+          <div class="steps-row hscroll-track">
+            <article class="reveal"><b>01</b>
+              <h3>Entendemos</h3>
+              <p>Conhecemos a realidade esportiva do município.</p>
+            </article><i>→</i>
+            <article class="reveal delay-1"><b>02</b>
+              <h3>Configuramos</h3>
+              <p>Personalizamos espaços, modalidades, equipes e identidade local.</p>
+            </article><i>→</i>
+            <article class="reveal delay-2"><b>03</b>
+              <h3>Conectamos</h3>
+              <p>Ajudamos a trazer atletas, equipes e eventos.</p>
+            </article><i>→</i>
+            <article class="reveal delay-3"><b>04</b>
+              <h3>Acompanhamos</h3>
+              <p>Sua gestão começa a utilizar a plataforma com nosso suporte.</p>
+            </article><i>→</i>
+            <article class="reveal delay-3"><b>05</b>
+              <h3>Impacto</h3>
+              <p>Acompanhamos os indicadores e a evolução da participação.</p>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10. CASE / PROVA — ativar quando houver município utilizando -->
+    <section class="proof section">
+      <div class="container proof-grid">
+        <div class="proof-copy reveal">
+          <p class="eyebrow light"><span></span> CASE</p>
+          <h2>Já está <em>acontecendo.</em></h2>
+          <p class="proof-lead">Veja como o Atleta do Vôlei pode transformar a experiência esportiva de um município.
+          </p>
+          <!-- PLACEHOLDER DE MÉTRICAS: substituir pelos números reais do município parceiro.
+               Enquanto não houver dados verificados, manter os rótulos "em breve" — não publicar números estimados. -->
+          <div class="proof-stats">
+            <div><strong>—</strong><small>atletas</small></div>
+            <div><strong>—</strong><small>equipes</small></div>
+            <div><strong>—</strong><small>eventos</small></div>
+            <div><strong>—</strong><small>quadras</small></div>
+          </div>
+          <p class="proof-note">Números do primeiro município parceiro em breve.</p>
+        </div>
+        <div class="proof-visual reveal delay-1">
+          <!-- PLACEHOLDER: trocar pela foto/depoimento do município -->
+          <img src="assets/images/placeholder-case.svg" alt="Placeholder da imagem do município parceiro" width="1200"
+            height="800" loading="lazy">
+        </div>
+      </div>
+    </section>
+
+    <!-- 11. FAQ -->
+    <section class="faq section">
+      <div class="container narrow">
+        <div class="center-head reveal">
+          <p class="eyebrow"><span></span> PERGUNTAS FREQUENTES <span></span></p>
+          <h2>Ainda tem <span>dúvidas?</span></h2>
+        </div>
+        <div class="faq-list reveal delay-1">
+          <details name="faq">
+            <summary>Como funciona para a prefeitura?<i class="faq-icon" aria-hidden="true"></i></summary>
+            <p>A prefeitura ganha um espaço próprio dentro da plataforma para organizar eventos, equipes e espaços
+              esportivos, além de um canal direto de comunicação com a comunidade.</p>
+          </details>
+          <details name="faq">
+            <summary>Quanto tempo leva para implementar?<i class="faq-icon" aria-hidden="true"></i></summary>
+            <p>A configuração inicial é rápida: mapeamos a realidade do município, personalizamos a plataforma e
+              acompanhamos o lançamento junto com a equipe da gestão.</p>
+          </details>
+          <details name="faq">
+            <summary>Precisamos cadastrar todos os atletas?<i class="faq-icon" aria-hidden="true"></i></summary>
+            <p>Não. Os próprios atletas criam seus perfis. A prefeitura acompanha a adesão e apoia a divulgação.</p>
+          </details>
+          <details name="faq">
+            <summary>Precisamos trocar o sistema que a Secretaria já usa?<i class="faq-icon" aria-hidden="true"></i></summary>
+            <p>Não. O Atleta do Vôlei convive com a solução generalista de gestão esportiva do município. Ele não
+              substitui o backoffice da Secretaria — potencializa especificamente a comunidade do vôlei.</p>
+          </details>
+          <details name="faq">
+            <summary>Tem custo para os atletas da cidade?<i class="faq-icon" aria-hidden="true"></i></summary>
+            <p>Não. O aplicativo já existe, é nacional e o uso é gratuito para o cidadão. A prefeitura contrata a camada
+              dedicada ao município.</p>
+          </details>
+          <details name="faq">
+            <summary>Como funciona a contratação?<i class="faq-icon" aria-hidden="true"></i></summary>
+            <p>Apresentamos o formato adequado ao porte do município e à realidade orçamentária da gestão. Fale com um
+              especialista para receber as condições.</p>
+          </details>
+          <details name="faq">
+            <summary>Como começar?<i class="faq-icon" aria-hidden="true"></i></summary>
+            <p>Preencha o formulário abaixo. Nosso time entra em contato para entender o cenário da sua cidade e
+              estruturar a proposta.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- 12. CTA FINAL -->
+    <section class="cta" id="contato">
+      <div class="cta-pattern" aria-hidden="true"></div>
+      <div class="container cta-grid">
+        <div class="reveal">
+          <p class="eyebrow light"><span></span> LEVE O ATLETA DO VÔLEI PARA A SUA CIDADE</p>
+          <h2>Comece a transformar a forma como sua prefeitura organiza, comunica e <em>desenvolve o esporte.</em></h2>
+          <p>Descubra como podemos estruturar a solução para o seu município.</p>
+        </div>
+        <form class="contact-form reveal delay-1" id="lead-form">
+          <label>Seu nome<input type="text" name="nome" placeholder="Como podemos chamar você?" required></label>
+          <label>Prefeitura / Município<input type="text" name="municipio" placeholder="Nome da sua cidade"
+              required></label>
+          <div class="form-row"><label>E-mail<input type="email" name="email" placeholder="voce@prefeitura.gov.br"
+                required></label><label>Telefone<input type="tel" name="telefone" placeholder="(00) 00000-0000"></label>
+          </div>
+          <button class="button button-coral" type="submit">Quero falar com um especialista <span>→</span></button>
+          <p class="form-status" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-grid">
+      <div><a class="brand brand-footer" href="#inicio"><img src="assets/images/logo-white.svg" alt="Atleta do Vôlei"
+            width="739" height="200"></a>
+        <p>A rede social feita para quem ama jogar vôlei — agora conectando cidades inteiras.</p>
+      </div>
+      <div><small>NAVEGAÇÃO</small><a href="#ganhos">O que a prefeitura ganha</a><a href="#solucao">A solução</a><a
+          href="#como-funciona">Como funciona</a></div>
+      <div><small>CONTATO</small><a href="mailto:contato@atletadovolei.com.br">contato@atletadovolei.com.br</a><a
+          href="https://atletadovolei.com.br/">atletadovolei.com.br</a></div>
+    </div>
+    <div class="container footer-bottom"><span>© 2026 Atleta do Vôlei. Todos os direitos reservados.</span>
+    </div>
+  </footer>
+  <!-- GSAP + plugins. Carregam antes de animations.js, que por sua vez
+       roda antes de script.js: assim script.js já encontra a flag
+       window.__gsapEnhanced e não liga o IntersectionObserver legado. -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollTrigger.min.js" crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollToPlugin.min.js" crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+  <script src="animations.js"></script>
+  <script src="script.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"
+    integrity="sha512-puJW3E/qXDqYp9IfhAI54BJEaWIfloJ7JWs7OeD5i6ruC9JZL1gERT1wjtwXFlh7CjE7ZJ+/vcRZRkIYIb6p4g=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="map.js"></script>
+</body>
+
+</html>

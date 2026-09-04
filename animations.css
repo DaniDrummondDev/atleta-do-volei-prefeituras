@@ -1,0 +1,515 @@
+/* ===================================================================
+   animations.css — camada de movimento (GSAP + ScrollTrigger)
+
+   REGRA DE OURO: quase tudo aqui vive sob `html.gsap-ready`.
+   Essa classe é aplicada por animations.js SOMENTE quando:
+     - a lib GSAP carregou do CDN, E
+     - o usuário não pediu `prefers-reduced-motion: reduce`.
+
+   Se qualquer uma das condições falhar, nenhuma regra abaixo se aplica
+   e a página volta exatamente ao comportamento original
+   (IntersectionObserver + `.reveal` do script.js/styles.css).
+
+   ONDE MEXER NO FUTURO:
+     - Layout do scroll horizontal .......... bloco "SCROLL HORIZONTAL"
+     - Aparência do header fixo ............. bloco "HEADER"
+     - Máscaras de texto .................... bloco "SPLIT DE TEXTO"
+   =================================================================== */
+
+/* -------------------------------------------------------------------
+   1. BASE — pré-requisitos técnicos do ScrollTrigger
+   ------------------------------------------------------------------- */
+
+/* `scroll-behavior: smooth` nativo briga com o pin do ScrollTrigger
+   (o browser e a lib disputam a posição de scroll). Desligamos e
+   fazemos a navegação por âncora via ScrollToPlugin. */
+html.gsap-ready {
+  scroll-behavior: auto;
+}
+
+/* `overflow-x: hidden` no body cria um contexto que quebra o
+   `position: fixed` usado pelo pin. `clip` corta igual, sem criar
+   containing block. Fallback para hidden em browsers antigos. */
+html.gsap-ready body {
+  overflow-x: clip;
+}
+
+/* O GSAP controla opacidade/transform dos `.reveal` diretamente.
+   Neutralizamos a transição CSS para não haver dupla animação. */
+html.gsap-ready .reveal {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+html.gsap-ready .delay-1,
+html.gsap-ready .delay-2,
+html.gsap-ready .delay-3 {
+  transition-delay: 0s;
+}
+
+/* Perf: avisa o compositor sobre os elementos que de fato se movem. */
+html.gsap-ready .hscroll-track,
+html.gsap-ready .hero-mockup,
+html.gsap-ready .floating-card {
+  will-change: transform;
+}
+
+/* -------------------------------------------------------------------
+   2. BARRA DE PROGRESSO DE LEITURA
+   Injetada por animations.js no topo do <body>.
+   ------------------------------------------------------------------- */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  z-index: 60;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  background: linear-gradient(90deg, var(--coral), #ffb199);
+  pointer-events: none;
+}
+
+/* -------------------------------------------------------------------
+   3. HEADER — fixo, com auto-hide e fundo translúcido
+   ------------------------------------------------------------------- */
+html.gsap-ready .site-header {
+  position: fixed;
+  transition:
+    transform 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+    height 0.35s ease,
+    background-color 0.35s ease,
+    border-color 0.35s ease;
+}
+
+/* Estado "colado": aplicado depois que o hero sai da tela. */
+html.gsap-ready .site-header.is-stuck {
+  height: 66px;
+  background: rgba(4, 31, 70, 0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Escondido enquanto o usuário desce; volta assim que ele sobe. */
+html.gsap-ready .site-header.is-hidden {
+  transform: translateY(-100%);
+}
+
+/* -------------------------------------------------------------------
+   4. SPLIT DE TEXTO — máscaras de palavra e de linha
+   `.w` é a janela (overflow), `.w-i` é o que desliza dentro dela.
+   O padding/margin negativo evita cortar descendentes (g, ç, j).
+   ------------------------------------------------------------------- */
+.split-word {
+  display: inline-block;
+  overflow: clip;
+  padding-bottom: 0.14em;
+  margin-bottom: -0.14em;
+  vertical-align: top;
+}
+.split-word-inner {
+  display: inline-block;
+  will-change: transform;
+}
+
+.split-char {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+/* -------------------------------------------------------------------
+   5. SCROLL HORIZONTAL
+   Estrutura no HTML:
+     <div class="hscroll-viewport">
+       <div class="hscroll-inner">
+         <div class="container hscroll-head"> … título … </div>
+         <div class="hscroll-track [classe-de-grid-original]"> … </div>
+       </div>
+     </div>
+   SEM gsap-ready o viewport/inner são divs comuns e o track mantém o
+   `display:grid`/`flex` original — o layout vertical não muda.
+   O head fica DENTRO do pin de propósito: o título continua na tela
+   enquanto os cards passam na horizontal.
+   ------------------------------------------------------------------- */
+.hscroll-viewport {
+  position: relative;
+}
+
+html.gsap-ready .hscroll-inner {
+  width: 100%;
+}
+
+html.gsap-ready .hscroll-viewport {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  margin-top: 0;
+}
+
+html.gsap-ready .hscroll-track {
+  display: flex;
+  align-items: stretch;
+  gap: 24px;
+  margin: 0;
+  /* Alinha o primeiro card com a .container (min(1160px, 100% - 40px)). */
+  padding: 0 max(20px, calc((100vw - 1160px) / 2));
+  width: max-content;
+}
+
+/* Cards do track: largura fixa para o cálculo de deslocamento ser estável. */
+html.gsap-ready .hscroll-track > article {
+  flex: 0 0 min(370px, 78vw);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+/* Separadores "→" das etapas não devem esticar. */
+html.gsap-ready .hscroll-track > i {
+  flex: 0 0 auto;
+  align-self: center;
+}
+
+/* Etapas ficam um pouco mais estreitas que os cards de "Na prática".
+   `align-items:center` restaura o alinhamento original do .steps-row,
+   que o `stretch` genérico do track sobrescreveria. */
+html.gsap-ready .steps-row.hscroll-track {
+  align-items: center;
+}
+html.gsap-ready .steps-row.hscroll-track > article {
+  flex: 0 0 min(300px, 72vw);
+  padding: 0 6px;
+}
+
+/* Cabeçalho que acompanha a faixa horizontal, fixo no topo do pin. */
+.hscroll-head {
+  position: relative;
+  z-index: 3;
+}
+html.gsap-ready .hscroll-head {
+  padding-bottom: 34px;
+}
+
+/* Dica visual de que ali se rola na horizontal. */
+.hscroll-hint {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 18px;
+  font: 600 11px/1 "Manrope", sans-serif;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+html.gsap-ready .hscroll-hint {
+  display: flex;
+}
+.hscroll-hint::after {
+  content: "";
+  width: 54px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--coral), rgba(255, 104, 77, 0));
+}
+
+/* Trilha de progresso da seção "Como implementamos". */
+.steps-progress {
+  display: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 16%;
+  height: 2px;
+  background: var(--line);
+  z-index: 0;
+}
+html.gsap-ready .steps-progress {
+  display: block;
+}
+.steps-progress i {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: var(--coral);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+}
+
+/* -------------------------------------------------------------------
+   6. JORNADA — 4 painéis de tela cheia em scroll horizontal
+   Ganhos → Desafio → Transformação → Posicionamento.
+
+   Reaproveita .hscroll-viewport/.hscroll-track (§5) e sobrescreve o que
+   é específico: cada filho é um painel de 100vw, sem gap nem padding
+   lateral no track (as .container internas já cuidam da margem).
+
+   Sem `gsap-ready` nada disto se aplica e as 4 <section> voltam a
+   empilhar verticalmente com o padding normal de .section.
+   ------------------------------------------------------------------- */
+html.gsap-ready .journey-track {
+  gap: 0;
+  padding: 0;
+  align-items: stretch;
+}
+
+html.gsap-ready .journey-panel {
+  flex: 0 0 100vw;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  /* 96px no topo reserva espaço para o header fixo; 76px embaixo,
+     para a .journey-nav. Vence o `padding: 110px 0` de .section por
+     especificidade (0,2,1 contra 0,1,0) — sem !important. */
+  padding: 96px 0 76px;
+  overflow: hidden;
+}
+
+/* `.container` tem `margin: auto`. Num flex-column isso vira margem
+   automática TAMBÉM no eixo vertical, e o item passa a absorver o
+   espaço livre — anulando o `justify-content: center` do painel.
+   Zeramos só o eixo vertical; o `auto` horizontal segue centralizando. */
+html.gsap-ready .journey-panel > .container {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+/* Densidade: o conteúdo precisa caber em 100vh em telas de 768px. */
+html.gsap-ready .journey-panel .stat-card {
+  min-height: 0;
+  padding: 26px;
+}
+html.gsap-ready .journey-panel .stats-grid,
+html.gsap-ready .journey-panel .transform-grid {
+  margin-top: 38px;
+}
+html.gsap-ready .journey-panel .problem-list {
+  margin-top: 30px;
+}
+html.gsap-ready .journey-panel .problem-list li {
+  padding: 9px 0 9px 18px;
+  margin-bottom: 8px;
+}
+html.gsap-ready .journey-panel .problem-close {
+  margin-top: 26px;
+}
+
+/* Painel "Posicionamento": tem conteúdo demais para empilhar em 100vh.
+   Vira duas colunas — discurso à esquerda, comparativo à direita. */
+html.gsap-ready .journey-panel.position .container {
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;
+  grid-template-areas:
+    "head grid"
+    "head quote";
+  align-items: center;
+  gap: 20px 52px;
+}
+html.gsap-ready .journey-panel.position .center-head {
+  grid-area: head;
+  text-align: left;
+}
+html.gsap-ready .journey-panel.position .center-head .eyebrow span:last-child {
+  display: none;
+}
+html.gsap-ready .journey-panel.position .position-lead {
+  margin-left: 0;
+  margin-right: 0;
+  font-size: 16px;
+}
+html.gsap-ready .journey-panel.position .position-grid {
+  grid-area: grid;
+  margin-top: 0;
+}
+html.gsap-ready .journey-panel.position .position-quote {
+  grid-area: quote;
+  margin: 0;
+  align-self: start;
+}
+
+/* O card "DEPOIS" começa fora de cena; o GSAP traz. */
+html.gsap-ready .journey-panel .transform-after,
+html.gsap-ready .journey-panel .transform-arrow {
+  will-change: transform, opacity;
+}
+
+/* -------------------------------------------------------------------
+   6b. JORNADA — navegação/progresso fixo no rodapé do pin
+   ------------------------------------------------------------------- */
+.journey-nav {
+  display: none;
+}
+html.gsap-ready .journey-nav {
+  display: block;
+  position: absolute;
+  left: 0;
+  bottom: 34px;
+  /* 100vw (e não right:0) para alinhar com os painéis, que também são
+     100vw. A .journey em si é ~15px mais estreita quando há scrollbar. */
+  width: 100vw;
+  z-index: 4;
+  pointer-events: none;
+}
+.journey-nav-rail {
+  width: min(1160px, calc(100% - 40px));
+  height: 2px;
+  margin: 0 auto 14px;
+  background: rgba(16, 35, 63, 0.12);
+}
+.journey-nav-rail i {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: var(--coral);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+}
+.journey-nav ol {
+  width: min(1160px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+.journey-nav li {
+  font: 700 10px/1.3 "Manrope", sans-serif;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  opacity: 0.32;
+  transition:
+    opacity 0.35s ease,
+    color 0.35s ease;
+}
+.journey-nav li.is-active {
+  opacity: 1;
+  color: var(--blue);
+}
+
+/* -------------------------------------------------------------------
+   6c. O GRANDE DIFERENCIAL — a rede em órbita
+
+   `.node-orbit` é criado EM TEMPO DE EXECUÇÃO por animations.js (§5,
+   initNetwork): cada .node é envolvido por um wrapper que cobre
+   exatamente a área do .network-visual. Girar o wrapper faz o nó
+   descrever um círculo em torno do centro do visual — que é onde está
+   o .network-center. O nó recebe a rotação inversa para o texto nunca
+   sair da horizontal.
+
+   O wrapper NÃO existe no HTML de propósito: sem GSAP ele seria um div
+   vazio sem função, e o `inset: 0` garante que o top/left original de
+   cada .node continue valendo exatamente como antes.
+   ------------------------------------------------------------------- */
+html.gsap-ready .node-orbit {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+html.gsap-ready .node-orbit > .node {
+  pointer-events: auto;
+  will-change: transform;
+}
+
+/* O núcleo fica acima dos wrappers de órbita. */
+html.gsap-ready .network-center {
+  z-index: 2;
+}
+
+/* Anéis lisos não deixam a rotação aparecer. O tracejado no anel do
+   meio dá referência visual ao giro sem pesar no desenho. */
+html.gsap-ready .ring-b {
+  border-style: dashed;
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+/* -------------------------------------------------------------------
+   7. MICROINTERAÇÕES
+   ------------------------------------------------------------------- */
+
+/* Botões magnéticos: o transform vem do GSAP, aqui só o hint de perf. */
+html.gsap-ready .button {
+  will-change: transform;
+}
+
+/* Tilt 3D dos cards precisa de perspectiva no pai. */
+html.gsap-ready .stats-grid,
+html.gsap-ready .feature-grid,
+html.gsap-ready .practice-grid {
+  perspective: 1400px;
+}
+
+/* -------------------------------------------------------------------
+   8. RESPONSIVO — abaixo de 900px não há scroll horizontal nem pin.
+   O JS também desmonta essas animações via matchMedia; o CSS aqui é a
+   segunda linha de defesa, garantindo layout correto mesmo entre o
+   parse do CSS e a execução do JS.
+   ------------------------------------------------------------------- */
+@media (max-width: 900px) {
+  html.gsap-ready .hscroll-viewport {
+    height: auto;
+    display: block;
+    overflow: visible;
+  }
+  html.gsap-ready .hscroll-track {
+    width: auto;
+    padding: 0;
+    flex-wrap: wrap;
+  }
+  html.gsap-ready .hscroll-track > article {
+    flex: 1 1 260px;
+  }
+  html.gsap-ready .steps-row.hscroll-track > article {
+    flex: 1 1 100%;
+  }
+  /* Jornada volta a empilhar: painéis com altura natural. */
+  html.gsap-ready .journey-panel {
+    flex: none;
+    width: auto;
+    height: auto;
+    display: block;
+    padding: 110px 0;
+    overflow: visible;
+  }
+  html.gsap-ready .journey-panel.position .container {
+    display: block;
+  }
+  html.gsap-ready .journey-panel.position .center-head {
+    text-align: center;
+  }
+  html.gsap-ready .journey-panel .stat-card {
+    min-height: 290px;
+  }
+  html.gsap-ready .hscroll-hint,
+  html.gsap-ready .steps-progress,
+  html.gsap-ready .journey-nav {
+    display: none;
+  }
+}
+
+/* -------------------------------------------------------------------
+   9. REDUCED MOTION — cinto de segurança.
+   animations.js já nem aplica `gsap-ready` nesse caso, mas se a
+   preferência mudar em tempo de execução isto zera o movimento.
+   ------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  html.gsap-ready .scroll-progress,
+  html.gsap-ready .hscroll-hint {
+    display: none;
+  }
+  html.gsap-ready .site-header.is-hidden {
+    transform: none;
+  }
+  .split-word-inner,
+  .split-char {
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
