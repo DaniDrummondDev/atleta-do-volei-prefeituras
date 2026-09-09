@@ -364,36 +364,149 @@
   }
 
   /* -----------------------------------------------------------------
-     §4 HERO — entrada na carga + parallax de saída
+     §4 HERO — sequência cinematográfica controlada pelo scroll
      ----------------------------------------------------------------- */
   function initHero() {
     var hero = $('.hero');
-    if (!hero) return;
+    var film = $('.hero-film', hero);
+    if (!hero || !film) return;
 
-    var h1 = $('.hero h1', hero);
-    var words = splitWords(h1);
+    var office = $('.hero-film-office', film);
+    var zoom = $('.hero-film-zoom', film);
+    var context = zoom.getContext('2d');
+    var court = $('.hero-film-court', film);
+    var phone = $('.hero-film-phone', film);
+    var outro = $('.hero-film-outro', film);
+    var copy = $$('.hero-film-copy span', film);
+    var scrollHint = $('.hero-film-scroll', hero);
 
-    var tl = gsap.timeline({ defaults: { ease: EASE, duration: DUR } });
+    if (!context) return;
+    var camera = { scale: 1 };
+    var playback = { progress: 0 };
+    var failed = false;
+    var tl;
 
-    tl.from('.hero .eyebrow', { y: 18, opacity: 0, duration: 0.6 })
-      .from(words, { yPercent: 118, stagger: 0.045, duration: 1 }, '-=0.25')
-      .from('.hero-lead', { y: 22, opacity: 0 }, '-=0.6')
-      .from('.hero-actions > *', { y: 18, opacity: 0, stagger: 0.1 }, '-=0.55')
-      .from('.hero-proof', { y: 18, opacity: 0 }, '-=0.5')
-      .from('.hero-mockup', { yPercent: 12, opacity: 0, scale: 0.96, duration: 1.2 }, '-=1.1')
-      .from('.orbit', { scale: 0.6, opacity: 0, stagger: 0.12, duration: 1 }, '-=1')
-      .from('.floating-card', { y: 26, opacity: 0, scale: 0.9, stagger: 0.15 }, '-=0.7')
-      .from('.hero-bottom', { opacity: 0, y: 10 }, '-=0.4');
+    // Amplia o recorte da própria fotografia, sem desenhar uma grade.
+    // Sem interpolação, os pixels originais ficam visíveis no close extremo.
+    function drawOffice() {
+      if (!office.naturalWidth) return;
+      var cover = Math.max(zoom.width / office.naturalWidth, zoom.height / office.naturalHeight);
+      var width = zoom.width / cover / camera.scale;
+      var height = zoom.height / cover / camera.scale;
+      var travel = 1 - 1 / camera.scale;
+      var centerX = office.naturalWidth * (0.5 + 0.14 * travel);
+      var centerY = office.naturalHeight * (0.5 - 0.06 * travel);
+      var left = Math.max(0, Math.min(office.naturalWidth - width, centerX - width / 2));
+      var top = Math.max(0, Math.min(office.naturalHeight - height, centerY - height / 2));
+      context.imageSmoothingEnabled = false;
+      context.drawImage(office, left, top, width, height, 0, 0, zoom.width, zoom.height);
+    }
 
-    // Parallax de saída: cada camada sobe em velocidade diferente.
-    gsap.timeline({
-      scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: 0.6 }
-    })
-      .to('.hero-copy', { y: -70, opacity: 0.15, ease: 'none' }, 0)
-      .to('.hero-mockup', { y: -160, ease: 'none' }, 0)
-      .to('.floating-card', { y: -230, ease: 'none' }, 0)
-      .to('.orbit', { scale: 1.25, opacity: 0, ease: 'none' }, 0)
-      .to('.hero-pattern', { y: 90, ease: 'none' }, 0);
+    function resizeOffice() {
+      var ratio = Math.min(window.devicePixelRatio || 1, 2);
+      zoom.width = Math.round(film.clientWidth * ratio);
+      zoom.height = Math.round(film.clientHeight * ratio);
+      drawOffice();
+    }
+
+    // Nunca usa play(): o tempo vem exclusivamente do progresso do scroll.
+    // Uma busca por vez evita cancelar continuamente a decodificação.
+    function seekVideo() {
+      if (failed || court.readyState < 2 || court.seeking || !Number.isFinite(court.duration)) return;
+      var target = playback.progress * Math.max(0, court.duration - 0.04);
+      if (Math.abs(court.currentTime - target) > 0.025) court.currentTime = target;
+    }
+
+    function mediaReady() {
+      if (failed || !office.naturalWidth || court.readyState < 2) return;
+      resizeOffice();
+      hero.classList.add('hero-film-ready');
+      seekVideo();
+    }
+
+    function mediaFailed() {
+      failed = true;
+      hero.classList.remove('hero-film-ready');
+      court.pause();
+      if (tl) {
+        tl.scrollTrigger.kill();
+        tl.kill();
+        ScrollTrigger.refresh();
+      }
+    }
+
+    court.muted = true;
+    court.pause();
+    court.addEventListener('seeked', seekVideo);
+    court.addEventListener('loadeddata', mediaReady);
+    court.addEventListener('error', mediaFailed);
+    office.addEventListener('load', mediaReady);
+    office.addEventListener('error', mediaFailed);
+    window.addEventListener('resize', resizeOffice);
+
+    gsap.set([court, phone, outro], { autoAlpha: 0 });
+    gsap.set(zoom, { autoAlpha: 1 });
+    gsap.set(copy, { autoAlpha: 0, yPercent: 112 });
+
+    tl = gsap.timeline({
+      defaults: { ease: 'none' },
+      scrollTrigger: {
+        id: 'hero-film',
+        trigger: hero,
+        start: 'top top',
+        end: function () { return '+=' + window.innerHeight * 5; },
+        pin: true,
+        scrub: 0.7,
+        anticipatePin: 1,
+        invalidateOnRefresh: true,
+        refreshPriority: 4
+      }
+    });
+    tl
+      // Escritório → pixels reais da tela → abertura para a filmagem.
+      .to(camera, { scale: 1, duration: 0.3 })
+      .to(camera, { scale: 160, duration: 1.2, ease: 'power3.in', onUpdate: drawOffice })
+      .to(scrollHint, { autoAlpha: 0, duration: 0.18 }, 0.32)
+      .fromTo(court, { scale: 24 }, { autoAlpha: 1, scale: 1, duration: 0.65, ease: 'power2.out' }, 1.5)
+      .to(zoom, { autoAlpha: 0, duration: 0.3 }, 1.5)
+      .to(office, { autoAlpha: 0, duration: 0.3 }, 1.5)
+      // Banners, mãos e atletas pertencem ao vídeo fornecido.
+      .to(playback, { progress: 1, duration: 3.4, onUpdate: seekVideo }, 2.15)
+      .to(outro, { autoAlpha: 1, duration: 0.5 }, 5.55)
+      .to(court, { autoAlpha: 0, duration: 0.5 }, 5.55)
+      .fromTo(phone, { scale: 0.82 }, { autoAlpha: 1, scale: 1, duration: 0.65 }, 5.7)
+      .to(copy, { autoAlpha: 1, yPercent: 0, stagger: 0.19, duration: 0.46 }, 6.05)
+      .to({}, { duration: 0.35 });
+
+    mediaReady();
+    if (court.error || (office.complete && !office.naturalWidth)) mediaFailed();
+
+    // Arquivos locais não permitem fetch(file://), mas <video src> pode
+    // carregá-los normalmente. Também serve de alternativa ao fetch HTTP.
+    function loadVideoDirectly() {
+      if (failed) return;
+      court.src = court.dataset.src;
+      court.load();
+    }
+
+    if (window.location.protocol === 'file:') {
+      loadVideoDirectly();
+      return;
+    }
+
+    // Em HTTP, carregar os ~5 MB completos permite buscar qualquer quadro
+    // mesmo quando o servidor não oferece requisições por intervalo.
+    fetch(court.dataset.src)
+      .then(function (response) {
+        if (!response.ok) throw new Error('Falha ao carregar o vídeo do hero');
+        return response.blob();
+      })
+      .then(function (blob) {
+        if (failed) return;
+        court.src = URL.createObjectURL(blob);
+        court.load();
+      })
+      .catch(loadVideoDirectly);
   }
 
   /* -----------------------------------------------------------------
@@ -927,6 +1040,17 @@
 
     horizontalScene('.journey', {
       priority: 3,
+      // Os quatro painéis têm exatamente 100vw. Ao encerrar o gesto,
+      // escolhe o painel mais próximo do centro (portanto, o que está
+      // mais presente na tela) e o alinha por inteiro na viewport.
+      snap: {
+        snapTo: function (progress) { return Math.round(progress * 3) / 3; },
+        directional: false,
+        inertia: false,
+        delay: 0.08,
+        duration: { min: 0.18, max: 0.5 },
+        ease: 'power1.inOut'
+      },
       onTimeline: function (tl) {
         initJourneyPanels(tl);
         initJourneyNav(tl, journey);
@@ -967,6 +1091,9 @@
         end: function () { return '+=' + (distance() + window.innerHeight * 0.4); },
         pin: true,
         scrub: 0.9,
+        // Só a jornada pede snap; as demais cenas horizontais continuam
+        // com o comportamento fluido que já tinham.
+        snap: options && options.snap,
         anticipatePin: 1,
         invalidateOnRefresh: true,
         // Maior = refrescado primeiro. Os pins precisam recalcular antes
@@ -1040,6 +1167,56 @@
   }
 
   /* -----------------------------------------------------------------
+     §7b SNAP VERTICAL — uma seção por vez
+
+     O snap nativo de CSS não convive bem com os pin-spacers das cenas
+     horizontais. Este trigger usa os inícios reais das seções e não
+     interfere enquanto o usuário está dentro de um trecho pinado.
+     ----------------------------------------------------------------- */
+  function initSectionSnap(selector) {
+    var snapTrigger;
+
+    var isInsidePinnedScene = function (scrollPosition) {
+      return ScrollTrigger.getAll().some(function (trigger) {
+        return trigger !== snapTrigger && trigger.vars.pin &&
+          scrollPosition > trigger.start && scrollPosition < trigger.end;
+      });
+    };
+
+    snapTrigger = ScrollTrigger.create({
+      start: 0,
+      end: 'max',
+      snap: {
+        snapTo: function (progress) {
+          var maxScroll = snapTrigger.end - snapTrigger.start;
+          var scrollPosition = snapTrigger.start + progress * maxScroll;
+
+          // A jornada, "Na prática" e "Como implementamos" precisam
+          // manter o scroll livre para conduzir suas faixas horizontais.
+          if (isInsidePinnedScene(scrollPosition)) return progress;
+
+          var targets = $$(selector).map(function (section) {
+            return section.getBoundingClientRect().top + window.scrollY;
+          });
+          var nearest = targets.reduce(function (closest, target) {
+            return Math.abs(target - scrollPosition) < Math.abs(closest - scrollPosition)
+              ? target : closest;
+          }, targets[0]);
+
+          return maxScroll ? nearest / maxScroll : 0;
+        },
+        directional: false,
+        inertia: false,
+        delay: 0.08,
+        duration: { min: 0.18, max: 0.5 },
+        ease: 'power1.inOut'
+      }
+    });
+
+    return function () { snapTrigger.kill(); };
+  }
+
+  /* -----------------------------------------------------------------
      §8 MICROINTERAÇÕES (só em ponteiro fino — nada em touch)
      ----------------------------------------------------------------- */
   function initMagnetic() {
@@ -1108,11 +1285,13 @@
       initJourneyScene();   // 4 painéis horizontais — prioridade 3
       initPracticeScene();  // Na prática              — prioridade 2
       initStepsScene();     // Como implementamos      — prioridade 1
+      return initSectionSnap('main > section, main > .journey');
     });
 
     // Mobile: a jornada empilha; as mesmas cenas rodam na vertical.
     mm.add('(max-width: 900px)', function () {
       initJourneyPanels(null);
+      return initSectionSnap('main > section, .journey-panel');
     });
 
     // --- Só agora as cenas verticais posteriores aos pins ---

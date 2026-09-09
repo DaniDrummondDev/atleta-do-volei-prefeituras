@@ -15,8 +15,9 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"
     integrity="sha512-h9FcoyWjHcOcmEVkxOfTLnmZFWIH0iZhZT1H2TbOq55xssQGEJHEaIm+PgoUaZbRvQTNTluNOEfb1ZRy6D3BOw=="
     crossorigin="anonymous" referrerpolicy="no-referrer">
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="animations.css">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <link rel="stylesheet" href="assets/css/animations.css">
+  <link rel="icon" type="image/png" href="assets/images/icon.png">
   <script>
     /* Aplica `gsap-ready` cedo (antes do primeiro paint) para evitar
        flash entre o layout estático e o animado. animations.js remove
@@ -50,40 +51,17 @@
 
   <main>
     <!-- 1. HERO -->
-    <section class="hero">
-      <div class="hero-pattern" aria-hidden="true"></div>
-      <div class="container hero-grid">
-        <div class="hero-copy reveal">
-          <p class="eyebrow light"><span></span> ATLETA DO VÔLEI PARA PREFEITURAS</p>
-          <h1>Transforme o vôlei <em>da sua cidade.</em></h1>
-          <p class="hero-lead">Organize eventos, conecte atletas, divulgue oportunidades e fortaleça a comunidade
-            esportiva em uma única plataforma — 100% dedicada ao vôlei e gratuita para o atleta.</p>
-          <div class="hero-actions">
-            <a href="#contato" class="button button-light">Falar com um especialista <span>↗</span></a>
-            <a href="#ganhos" class="text-link">Conheça a solução <span>↓</span></a>
-          </div>
-          <div class="hero-proof">
-            <div class="avatar-stack" aria-label="Comunidade de atletas">
-              <span>JL</span><span>MA</span><span>RC</span><span>+</span>
-            </div>
-            <p><strong>O aplicativo já existe e é gratuito</strong><br>para os atletas da sua cidade</p>
-          </div>
-        </div>
-        <div class="hero-visual reveal delay-1" aria-label="Demonstração do aplicativo">
-          <div class="orbit orbit-one"></div>
-          <div class="orbit orbit-two"></div>
-          <div class="floating-card card-event"><span class="card-icon">🏆</span>
-            <div><small>NOVO EVENTO</small><strong>Copa Municipal</strong></div>
-          </div>
-          <img class="hero-mockup" src="assets/images/mockup_01.svg"
-            alt="Telas do aplicativo Atleta do Vôlei apresentadas em um celular" width="687" height="1154">
-          <div class="floating-card card-connect">
-            <div class="mini-avatars"><i></i><i></i><i></i></div>
-            <div><strong>+48 conexões</strong><small>esta semana</small></div>
-          </div>
-        </div>
+    <section class="hero hero-film-section">
+      <div class="hero-film" aria-label="Da gestão de um campeonato à transformação do vôlei da cidade">
+        <img class="hero-film-scene hero-film-office" src="assets/images/hero-office-icon-small.png" alt="" fetchpriority="high">
+        <canvas class="hero-film-scene hero-film-zoom" aria-hidden="true"></canvas>
+        <video class="hero-film-scene hero-film-court" data-src="assets/video/video.mp4" muted playsinline preload="auto" aria-hidden="true" disablepictureinpicture></video>
+        <img class="hero-film-phone" src="assets/images/mockup_01.png"
+          alt="Aplicativo Atleta do Vôlei em um celular" width="358" height="746">
+        <div class="hero-film-outro" aria-hidden="true"></div>
+        <h1 class="hero-film-copy"><span>Transforme o</span><span>vôlei <em>da sua</em></span><span><em>cidade.</em></span></h1>
       </div>
-      <div class="hero-bottom"><span>↓</span> O QUE A PREFEITURA GANHA</div>
+      <p class="hero-film-scroll" aria-hidden="true"><span>↓</span> ROLE PARA CONHECER</p>
     </section>
 
     <!-- ================================================================
@@ -172,7 +150,8 @@
             <div class="center-head reveal">
               <p class="eyebrow"><span></span> POSICIONAMENTO <span></span></p>
               <h2>Não é mais um sistema de gestão.<br><span>É o vôlei da cidade acontecendo.</span></h2>
-              <p class="position-lead">Sua Secretaria pode continuar com a solução generalista que já usa para administrar
+              <p class="position-lead">Sua Secretaria pode continuar com a solução generalista que já usa para
+                administrar
                 todos os esportes. O Atleta do Vôlei entra por cima disso, para potencializar uma modalidade que já tem
                 comunidade, campeonatos e atletas próprios.</p>
             </div>
@@ -201,7 +180,7 @@
             <p class="position-quote reveal delay-2">“Uma prefeitura não precisa escolher entre administrar todos os
               esportes e investir especificamente no vôlei.”</p>
           </div>
-            </section>
+        </section>
 
       </div><!-- /.journey-track -->
 
@@ -513,7 +492,8 @@
             <p>Não. Os próprios atletas criam seus perfis. A prefeitura acompanha a adesão e apoia a divulgação.</p>
           </details>
           <details name="faq">
-            <summary>Precisamos trocar o sistema que a Secretaria já usa?<i class="faq-icon" aria-hidden="true"></i></summary>
+            <summary>Precisamos trocar o sistema que a Secretaria já usa?<i class="faq-icon" aria-hidden="true"></i>
+            </summary>
             <p>Não. O Atleta do Vôlei convive com a solução generalista de gestão esportiva do município. Ele não
               substitui o backoffice da Secretaria — potencializa especificamente a comunidade do vôlei.</p>
           </details>
@@ -582,12 +562,12 @@
     referrerpolicy="no-referrer"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollToPlugin.min.js" crossorigin="anonymous"
     referrerpolicy="no-referrer"></script>
-  <script src="animations.js"></script>
-  <script src="script.js"></script>
+  <script src="assets/js/animations.js"></script>
+  <script src="assets/js/script.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"
     integrity="sha512-puJW3E/qXDqYp9IfhAI54BJEaWIfloJ7JWs7OeD5i6ruC9JZL1gERT1wjtwXFlh7CjE7ZJ+/vcRZRkIYIb6p4g=="
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script src="map.js"></script>
+  <script src="assets/js/map.js"></script>
 </body>
 
 </html>

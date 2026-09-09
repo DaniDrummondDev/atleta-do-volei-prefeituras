@@ -41,6 +41,11 @@ input {
 .section {
   padding: 110px 0;
 }
+/* Cada seção ocupa ao menos uma tela. A altura é mínima para preservar
+   o conteúdo de seções que naturalmente ultrapassam a viewport. */
+main section {
+  min-height: 100vh;
+}
 .site-header {
   height: 82px;
   background: var(--blue-dark);
@@ -132,7 +137,7 @@ input {
   margin: 5px;
 }
 .hero {
-  min-height: 790px;
+  min-height: 100vh;
   padding: 150px 0 80px;
   background: var(--blue-dark);
   color: white;
@@ -454,6 +459,148 @@ input {
 .hero-bottom span {
   color: var(--coral);
   margin-right: 7px;
+}
+
+/* HERO FILME — cenas fotográficas compostas e animadas pelo scroll. */
+.hero.hero-film-section {
+  height: 100vh;
+  min-height: 100vh;
+  padding: 0;
+  background: #061d3d;
+}
+.hero-film-section:after {
+  display: none;
+}
+.hero-film {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #061d3d;
+}
+.hero-film-scene,
+.hero-film-outro {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.hero-film-scene {
+  object-fit: cover;
+  object-position: center;
+  transform-origin: 63% 48%;
+}
+.hero-film-zoom,
+.hero-film-court,
+.hero-film-phone,
+.hero-film-outro {
+  opacity: 0;
+}
+.hero-film-zoom { z-index: 1; }
+.hero-film-court {
+  z-index: 2;
+  transform-origin: 56% 57%;
+}
+.hero-film-phone {
+  position: absolute;
+  z-index: 7;
+  left: 77%;
+  top: 50%;
+  width: min(23vw, 32vh, 340px);
+  height: auto;
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(0 18px 22px rgba(0, 0, 0, 0.38));
+}
+.hero-film-outro {
+  z-index: 6;
+  background-color: var(--blue-dark);
+  background-image: linear-gradient(30deg, transparent 48%, rgba(255, 255, 255, 0.09) 49%, rgba(255, 255, 255, 0.09) 51%, transparent 52%);
+  background-size: 80px 80px;
+}
+.hero h1.hero-film-copy {
+  position: absolute;
+  z-index: 8;
+  top: 50%;
+  left: max(5vw, calc((100vw - 1160px) / 2));
+  margin: 0;
+  transform: translateY(-50%);
+  color: white;
+  font: 800 clamp(36px, 5.6vw, 104px)/1.02 "Manrope", sans-serif;
+  letter-spacing: -0.065em;
+}
+.hero-film-copy span {
+  display: block;
+}
+.hero-film-copy em {
+  color: var(--coral);
+  font-style: normal;
+}
+.hero-film-scroll {
+  position: absolute;
+  z-index: 9;
+  bottom: 22px;
+  left: 50%;
+  margin: 0;
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, 0.68);
+  font: 700 9px/1 "Manrope", sans-serif;
+  letter-spacing: 0.16em;
+}
+.hero-film-scroll span {
+  color: var(--coral);
+  margin-right: 7px;
+}
+
+@media (max-width: 900px) {
+  .hero h1.hero-film-copy {
+    left: 7vw;
+    font-size: clamp(30px, 5.6vw, 72px);
+  }
+}
+
+@media (max-width: 600px) {
+  .hero h1.hero-film-copy {
+    left: 5vw;
+    font-size: clamp(22px, 6vw, 36px);
+  }
+  .hero-film-scroll {
+    bottom: 14px;
+  }
+}
+
+/* Enquanto a mídia carrega, mantém a primeira cena, não o encerramento. */
+html.gsap-ready .hero-film-section:not(.hero-film-ready) .hero-film-office {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+html.gsap-ready .hero-film-section:not(.hero-film-ready) .hero-film-zoom,
+html.gsap-ready .hero-film-section:not(.hero-film-ready) .hero-film-court,
+html.gsap-ready .hero-film-section:not(.hero-film-ready) .hero-film-outro,
+html.gsap-ready .hero-film-section:not(.hero-film-ready) .hero-film-phone,
+html.gsap-ready .hero-film-section:not(.hero-film-ready) .hero-film-copy {
+  visibility: hidden !important;
+}
+
+/* O quadro final estático é reservado à ausência de GSAP/movimento. */
+html:not(.gsap-ready) .hero-film-office,
+html:not(.gsap-ready) .hero-film-zoom,
+html:not(.gsap-ready) .hero-film-court,
+html:not(.gsap-ready) .hero-film-scroll {
+  visibility: hidden !important;
+}
+html:not(.gsap-ready) .hero-film-outro,
+html:not(.gsap-ready) .hero-film-phone,
+html:not(.gsap-ready) .hero-film-copy span {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+html:not(.gsap-ready) .hero-film-phone {
+  left: 77% !important;
+  top: 50% !important;
+  width: min(23vw, 32vh, 340px) !important;
+}
+html:not(.gsap-ready) .hero-film-copy span {
+  transform: none !important;
 }
 .statement {
   text-align: center;
