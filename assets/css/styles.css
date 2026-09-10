@@ -16,6 +16,14 @@
 html {
   scroll-behavior: smooth;
 }
+/* Com GSAP ativo o scroll suave é feito pelo ScrollToPlugin (initAnchors).
+   O `scroll-behavior: smooth` nativo briga com o ScrollTrigger: o navegador
+   continua animando a posição por conta própria enquanto os pins leem
+   scrollY, o que no mobile produz travamento e "pulos" no unpin. Sem
+   gsap-ready (JS ausente / motion reduzido) o suave nativo permanece. */
+html.gsap-ready {
+  scroll-behavior: auto;
+}
 body {
   margin: 0;
   color: var(--ink);
@@ -478,6 +486,17 @@ main section:not(.hero):not(.journey-panel) {
 .hero-film-section:after {
   display: none;
 }
+/* Mesma correção de camada já aplicada em `.practice .hscroll-viewport`
+   (animations.css §5): enquanto o ScrollTrigger mantém o hero em
+   `position: fixed`, ele precisa de um z-index próprio — senão a
+   `.journey`, que vem depois no DOM e é `position: relative`, é pintada
+   por cima dele. A classe é posta/retirada pelo `onToggle` do pin em
+   animations.js, então fora do pin o empilhamento volta ao natural e a
+   seção seguinte cobre o hero normalmente. Fica abaixo do .site-header
+   (z-index 20), que precisa continuar visível. */
+html.gsap-ready .hero.hero-film-section.is-pinned {
+  z-index: 4;
+}
 .hero-film {
   position: relative;
   width: 100%;
@@ -555,23 +574,51 @@ main section:not(.hero):not(.journey-panel) {
 }
 
 @media (max-width: 900px) {
-  /* O ScrollTrigger injeta width/height inline durante o pin. Estas
-     dimensões precisam refletir a viewport segura do navegador mobile. */
+  /* ================================================================
+     ALTURA DO PALCO = 100lvh (LARGE viewport), NUNCA 100svh.
+
+     Antes daqui estava `100svh`. No iOS Safari:
+       svh = altura com TODAS as barras visíveis  (a MENOR)
+       lvh = altura com as barras recolhidas      (a MAIOR)
+     Durante a rolagem o Safari recolhe as barras, então a viewport
+     real vira ~lvh. Com o palco em svh, o hero — que está
+     `position: fixed` por causa do pin — cobria só ~85% da tela e
+     sobrava uma FAIXA embaixo, onde a seção seguinte aparecia e
+     rolava. É exatamente o que se vê em docs/bug.mp4: a cena parada
+     no topo e "O que a prefeitura ganha?" desfilando na tira de baixo.
+
+     `lvh` é estático (não muda quando as barras recolhem, ao
+     contrário de `dvh`), então serve para um elemento fixo sem
+     provocar mudança de altura no meio da cena. Com as barras
+     VISÍVEIS sobra altura para fora da tela — o excesso fica atrás da
+     toolbar, o que é invisível e inofensivo.
+
+     `100vh` vem antes como fallback: em iOS `vh` já equivale a `lvh`.
+     ================================================================ */
   .hero.hero-film-section,
   .hero.hero-film-section.hero-film-ready {
     width: 100% !important;
     min-width: 100% !important;
     max-width: 100% !important;
-    height: 100svh !important;
-    min-height: 100svh !important;
-    max-height: 100svh !important;
+    height: 100vh !important;
+    height: 100lvh !important;
+    min-height: 100vh !important;
+    min-height: 100lvh !important;
+    max-height: 100vh !important;
+    max-height: 100lvh !important;
   }
   .hero.hero-film-section .hero-film {
     width: 100% !important;
-    height: 100svh !important;
+    height: 100vh !important;
+    height: 100lvh !important;
   }
+  /* O palco tem altura `lvh`, mas o que o usuário enxerga com as
+     barras abertas é só a faixa `svh` do topo. Por isso os elementos
+     internos são posicionados em unidades `svh` — assim continuam
+     onde estavam antes, dentro da área sempre visível, em vez de
+     escorregarem para trás da toolbar junto com o palco maior. */
   .hero h1.hero-film-copy {
-    top: 29%;
+    top: 29svh;
     left: 50%;
     width: 86vw;
     margin-left: -43vw;
@@ -580,27 +627,35 @@ main section:not(.hero):not(.journey-panel) {
   }
   .hero-film-phone {
     left: 50%;
-    top: 65%;
-    width: min(86vw, 44vh, 420px);
+    top: 65svh;
+    width: min(86vw, 44svh, 420px);
   }
   html:not(.gsap-ready) .hero-film-phone {
     left: 50% !important;
-    top: 65% !important;
-    width: min(86vw, 44vh, 420px) !important;
+    top: 65svh !important;
+    width: min(86vw, 44svh, 420px) !important;
+  }
+  /* Ancorado ao rodapé da área VISÍVEL, não ao rodapé do palco (que
+     agora fica atrás da toolbar do navegador). */
+  .hero-film-scroll {
+    bottom: auto;
+    top: calc(100svh - 72px);
   }
 }
 
 @media (max-width: 600px) {
   .hero h1.hero-film-copy {
-    top: 29%;
+    top: 29svh;
     left: 50%;
     width: 86vw;
     margin-left: -43vw;
     text-align: center;
     font-size: clamp(40px, 11vw, 52px);
   }
+  /* Mesma ancoragem em `svh` do bloco de 900px — ver comentário lá. */
   .hero-film-scroll {
-    bottom: 14px;
+    bottom: auto;
+    top: calc(100svh - 64px);
   }
 }
 
@@ -814,6 +869,110 @@ html:not(.gsap-ready) .hero-film-copy span {
   top: 205px;
   left: -15px;
 }
+/* =====================================================================
+   DIAGRAMA DA REDE NO MOBILE
+
+   As medidas acima são todas em px absolutos e foram desenhadas para a
+   coluna de ~538px do grid de duas colunas do desktop: anel externo de
+   510px, nós de 152px, posições como `left: 193px`. Abaixo de 900px o
+   grid vira UMA coluna de ~350px e nada disso é recalculado — os quatro
+   nós caem uns por cima dos outros e por cima do núcleo, e os anéis
+   passam por fora da tela (o `overflow: hidden` da .network os corta).
+
+   Aqui o desenho é reexpresso em PORCENTAGEM de um palco QUADRADO. Como
+   toda medida — diâmetros e posições — passa a ser relativa ao lado do
+   quadrado, o diagrama inteiro escala junto e as proporções do desktop
+   são preservadas.
+
+   Geometria (S = lado do quadrado):
+     nó            d = 30% de S       raio da órbita R = 35% de S
+     anéis         90% / 61% / 37%    (mesmas razões do desktop)
+     núcleo        29%
+   Com R = 35% e d/2 = 15%, os nós tangenciam exatamente a borda do
+   palco (35 + 15 = 50%) — nenhum é cortado. A folga entre dois nós
+   vizinhos é R·√2 − d ≈ 19% de S, o que impede a sobreposição.
+
+   ATENÇÃO ao mexer: `.node` NÃO pode receber `transform` por CSS. O
+   animations.js (initNetwork) envolve cada nó num `.node-orbit` e
+   escreve `transform: rotate()` tanto no wrapper quanto no próprio nó
+   para manter o texto na horizontal — qualquer transform daqui seria
+   sobrescrito. Por isso as posições usam só top/left.
+   ===================================================================== */
+@media (max-width: 900px) {
+  .network-visual {
+    width: min(100%, 380px);
+    height: auto;
+    aspect-ratio: 1;
+    margin-inline: auto;
+  }
+  .ring-a {
+    width: 90%;
+    height: auto;
+    aspect-ratio: 1;
+  }
+  .ring-b {
+    width: 61%;
+    height: auto;
+    aspect-ratio: 1;
+  }
+  .ring-c {
+    width: 37%;
+    height: auto;
+    aspect-ratio: 1;
+  }
+  .network-center {
+    width: 29%;
+    height: auto;
+    aspect-ratio: 1;
+    box-shadow: 0 0 0 8px rgba(255, 104, 77, 0.15);
+  }
+  .network-center span {
+    font-size: 17px;
+  }
+  .network-center b {
+    font-size: 10px;
+  }
+  .node {
+    width: 30%;
+    height: auto;
+    aspect-ratio: 1;
+    padding: 0 8px;
+  }
+  .node i {
+    font-size: 18px;
+  }
+  .node b {
+    font-size: 11px;
+    margin-top: 3px;
+  }
+  /* Num círculo de ~114px a descrição de 3 linhas não cabe sem
+     transbordar. O ícone e o rótulo sustentam a leitura; o detalhe já
+     está no texto ao lado. Para trazê-la de volta seria preciso um nó
+     bem maior — e aí os quatro voltam a se sobrepor. */
+  .node small {
+    display: none;
+  }
+  /* Posições = BORDA do nó (não o centro): 50% ∓ R ∓ d/2. */
+  .node-athletes {
+    top: 0;
+    left: 35%;
+  }
+  .node-teams {
+    top: 35%;
+    left: 70%;
+    right: auto;
+  }
+  .node-courts {
+    top: 70%;
+    bottom: auto;
+    left: 35%;
+  }
+  .node-events {
+    top: 35%;
+    left: 0;
+  }
+}
+
 .network h2 {
   font-size: 48px;
 }

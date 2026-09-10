@@ -53,6 +53,15 @@
   gsap.registerPlugin(ScrollTrigger);
   if (window.ScrollToPlugin) gsap.registerPlugin(ScrollToPlugin);
 
+  /* No mobile, esconder/mostrar a barra de URL dispara `resize` e muda
+     window.innerHeight em ~90px NO MEIO da rolagem. Com refresh a cada
+     toggle, todo `end` calculado a partir de innerHeight se move junto —
+     o pin do hero nunca alcançava o ponto de soltura e a seção seguinte
+     passava por cima dele, ainda fixo. `ignoreMobileResize` faz o
+     ScrollTrigger ignorar mudanças de ALTURA em telas de toque; giro de
+     tela (que muda a largura) continua provocando refresh normalmente. */
+  ScrollTrigger.config({ ignoreMobileResize: true });
+
   // Sinaliza para script.js que o observer legado não deve rodar.
   window.__gsapEnhanced = true;
 
@@ -386,6 +395,8 @@
     var phone = $('.hero-film-phone', film);
     var outro = $('.hero-film-outro', film);
     var copy = $('.hero-film-copy', film);
+    // Fica FORA de .hero-film (é irmão dele dentro de .hero).
+    var scrollHint = $('.hero-film-scroll', hero);
 
     if (!context) return;
     var camera = { scale: 1 };
@@ -411,8 +422,18 @@
 
     function resizeOffice() {
       var ratio = Math.min(window.devicePixelRatio || 1, 2);
-      zoom.width = Math.round(film.clientWidth * ratio);
-      zoom.height = Math.round(film.clientHeight * ratio);
+      var w = Math.round(film.clientWidth * ratio);
+      var h = Math.round(film.clientHeight * ratio);
+      // Reatribuir width/height limpa o canvas e realoca o buffer. No
+      // mobile o `resize` da barra de URL chegava dezenas de vezes por
+      // rolagem, piscando a cena. Só refaz quando a dimensão realmente
+      // mudou (giro de tela / redimensionamento real da janela).
+      if (zoom.width !== w || zoom.height !== h) {
+        zoom.width = w;
+        zoom.height = h;
+      }
+      // Sempre redesenha: `mediaReady` chama esta função de novo quando a
+      // foto termina de carregar, e nessa hora as dimensões já batem.
       drawOffice();
     }
 
@@ -463,15 +484,37 @@
         id: 'hero-film',
         trigger: hero,
         start: 'top top',
-        end: function () { return '+=' + window.innerHeight * 5; },
+        // A duração do pin vem da ALTURA MEDIDA DO PRÓPRIO HERO, não de
+        // window.innerHeight. No desktop dá no mesmo (.hero-film-section
+        // é 100vh). No mobile o hero é 100svh — um valor que NÃO muda
+        // quando a barra de URL aparece/some, ao contrário de innerHeight.
+        // Com innerHeight, o ponto de unpin se deslocava durante a própria
+        // rolagem e o hero ficava travado enquanto a seção seguinte subia
+        // por cima. `|| window.innerHeight` cobre o caso do hero ainda não
+        // ter altura no primeiro refresh.
+        end: function () {
+          return '+=' + (hero.offsetHeight || window.innerHeight) * 5;
+        },
         pin: true,
         scrub: 0.7,
         anticipatePin: 1,
         invalidateOnRefresh: true,
-        refreshPriority: 4
+        refreshPriority: 4,
+        // Durante o pin o ScrollTrigger torna o hero `position: fixed` com
+        // z-index auto. A .journey vem depois no DOM e é `position:
+        // relative`, então pintava POR CIMA do hero ainda fixo. A classe
+        // dá ao hero uma camada própria só enquanto ele está pinado; ao
+        // soltar, o z-index volta a `auto` e o fluxo normal se restabelece.
+        onToggle: function (self) {
+          hero.classList.toggle('is-pinned', self.isActive);
+        }
       }
     });
     tl
+      // O convite para rolar cumpriu o papel assim que a rolagem começa.
+      // Sem isto o GIF ficava sobreposto à cena inteira (visível em
+      // docs/bug.mp4 como um borrão escuro do começo ao fim do filme).
+      .to(scrollHint || {}, { autoAlpha: 0, duration: 0.12, ease: 'power1.in' }, 0)
       // Escritório → pixels reais da tela → abertura para a filmagem.
       .to(camera, { scale: 1, duration: 0.3 })
       .to(camera, { scale: 160, duration: 1.2, ease: 'power3.in', onUpdate: drawOffice })
