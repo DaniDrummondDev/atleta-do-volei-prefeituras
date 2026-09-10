@@ -46,6 +46,13 @@ input {
 main section {
   min-height: 100vh;
 }
+/* Mantém cada seção visualmente centrada na viewport. Se o conteúdo for
+   maior que a tela, o min-height permite que ela cresça sem recortes. */
+main section:not(.hero):not(.journey-panel) {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
 .site-header {
   height: 82px;
   background: var(--blue-dark);
@@ -506,7 +513,7 @@ main section {
   z-index: 7;
   left: 77%;
   top: 50%;
-  width: min(23vw, 32vh, 340px);
+  width: min(40vw, 70vh, 700px);
   height: auto;
   transform: translate(-50%, -50%);
   filter: drop-shadow(0 18px 22px rgba(0, 0, 0, 0.38));
@@ -525,8 +532,9 @@ main section {
   margin: 0;
   transform: translateY(-50%);
   color: white;
-  font: 800 clamp(36px, 5.6vw, 104px)/1.02 "Manrope", sans-serif;
-  letter-spacing: -0.065em;
+  font: 800 clamp(52px, 8vw, 100px)/1.02 "Manrope", sans-serif;
+  letter-spacing: -0.075em;
+  text-shadow: 0 6px 24px rgba(0, 0, 0, 0.8);
 }
 .hero-film-copy span {
   display: block;
@@ -540,28 +548,56 @@ main section {
   z-index: 9;
   bottom: 22px;
   left: 50%;
-  margin: 0;
+  display: block;
+  width: 50px;
+  height: 50px;
   transform: translateX(-50%);
-  color: rgba(255, 255, 255, 0.68);
-  font: 700 9px/1 "Manrope", sans-serif;
-  letter-spacing: 0.16em;
-}
-.hero-film-scroll span {
-  color: var(--coral);
-  margin-right: 7px;
 }
 
 @media (max-width: 900px) {
+  /* O ScrollTrigger injeta width/height inline durante o pin. Estas
+     dimensões precisam refletir a viewport segura do navegador mobile. */
+  .hero.hero-film-section,
+  .hero.hero-film-section.hero-film-ready {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    height: 100svh !important;
+    min-height: 100svh !important;
+    max-height: 100svh !important;
+  }
+  .hero.hero-film-section .hero-film {
+    width: 100% !important;
+    height: 100svh !important;
+  }
   .hero h1.hero-film-copy {
-    left: 7vw;
-    font-size: clamp(30px, 5.6vw, 72px);
+    top: 29%;
+    left: 50%;
+    width: 86vw;
+    margin-left: -43vw;
+    text-align: center;
+    font-size: clamp(42px, 10vw, 72px);
+  }
+  .hero-film-phone {
+    left: 50%;
+    top: 65%;
+    width: min(86vw, 44vh, 420px);
+  }
+  html:not(.gsap-ready) .hero-film-phone {
+    left: 50% !important;
+    top: 65% !important;
+    width: min(86vw, 44vh, 420px) !important;
   }
 }
 
 @media (max-width: 600px) {
   .hero h1.hero-film-copy {
-    left: 5vw;
-    font-size: clamp(22px, 6vw, 36px);
+    top: 29%;
+    left: 50%;
+    width: 86vw;
+    margin-left: -43vw;
+    text-align: center;
+    font-size: clamp(40px, 11vw, 52px);
   }
   .hero-film-scroll {
     bottom: 14px;
@@ -576,16 +612,14 @@ html.gsap-ready .hero-film-section:not(.hero-film-ready) .hero-film-office {
 html.gsap-ready .hero-film-section:not(.hero-film-ready) .hero-film-zoom,
 html.gsap-ready .hero-film-section:not(.hero-film-ready) .hero-film-court,
 html.gsap-ready .hero-film-section:not(.hero-film-ready) .hero-film-outro,
-html.gsap-ready .hero-film-section:not(.hero-film-ready) .hero-film-phone,
-html.gsap-ready .hero-film-section:not(.hero-film-ready) .hero-film-copy {
+html.gsap-ready .hero-film-section:not(.hero-film-ready) .hero-film-phone {
   visibility: hidden !important;
 }
 
 /* O quadro final estático é reservado à ausência de GSAP/movimento. */
 html:not(.gsap-ready) .hero-film-office,
 html:not(.gsap-ready) .hero-film-zoom,
-html:not(.gsap-ready) .hero-film-court,
-html:not(.gsap-ready) .hero-film-scroll {
+html:not(.gsap-ready) .hero-film-court {
   visibility: hidden !important;
 }
 html:not(.gsap-ready) .hero-film-outro,
@@ -597,7 +631,7 @@ html:not(.gsap-ready) .hero-film-copy span {
 html:not(.gsap-ready) .hero-film-phone {
   left: 77% !important;
   top: 50% !important;
-  width: min(23vw, 32vh, 340px) !important;
+  width: min(40vw, 68vh, 700px) !important;
 }
 html:not(.gsap-ready) .hero-film-copy span {
   transform: none !important;
@@ -679,6 +713,13 @@ html:not(.gsap-ready) .hero-film-copy span {
   grid-template-columns: 1fr 1fr;
   align-items: center;
   gap: 80px;
+}
+@media (min-width: 901px) {
+  .network-grid {
+    /* Compensa o cabeçalho e mantém o conjunto ligeiramente acima do
+       centro visual, sem alterar o contexto da rede e de seus círculos. */
+    transform: translateY(8px);
+  }
 }
 .network-visual {
   height: 570px;
@@ -811,7 +852,53 @@ html:not(.gsap-ready) .hero-film-copy span {
   margin-top: 4px;
 }
 .features {
-  background: #fbfaf6;
+  position: relative;
+  isolation: isolate;
+  height: 100vh;
+  min-height: 100vh !important;
+  overflow: hidden;
+  background: #edf0ec;
+}
+.features::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: rgba(251, 250, 246, 0.60);
+  pointer-events: none;
+}
+.features > .container {
+  position: relative;
+  z-index: 1;
+}
+/* O mapa ocupa toda a seção e fica suavizado para preservar a legibilidade
+   do conteúdo e dos cards sobrepostos. */
+.features-map {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background: #e8e0d8;
+}
+.features-map .leaflet-container {
+  width: 100%;
+  height: 100%;
+  background: #e8e0d8;
+}
+.features .section-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 860px;
+  margin: 0 auto;
+  text-align: center;
+}
+.features .section-head h2 {
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+}
+.features .section-head > p {
+  max-width: 620px;
+  margin-top: 22px;
+  text-shadow: 0 1px 6px rgba(255, 255, 255, 0.8);
 }
 .section-head {
   display: grid;
@@ -826,7 +913,7 @@ html:not(.gsap-ready) .hero-film-copy span {
 }
 .feature-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 20px;
 }
 .feature-card {
@@ -920,31 +1007,11 @@ html:not(.gsap-ready) .hero-film-copy span {
 .coral {
   color: var(--coral);
 }
-.coral-card {
-  background: var(--coral);
-  color: white;
-  border-color: var(--coral);
-}
-.coral-card .feature-icon,
-.coral-card p {
-  color: white;
-}
-.coral-card .feature-num {
-  color: #ffd1c8;
-}
-/* Mapa real (OpenStreetMap/Leaflet). Ocupa toda a largura do card e
-   cresce para consumir a sobra vertical — quanto menos texto, mais mapa. */
-.map-canvas {
-  position: relative;
-  flex: 1;
-  min-height: 215px;
-  margin: 18px -29px -29px;
-  background: #e8e0d8;
-  overflow: hidden;
-  display: grid;
-  place-items: center;
-}
 .map-status {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  transform: translate(-50%, -50%);
+  z-index: 500;
   margin: 0;
   padding: 0 16px;
   text-align: center;
@@ -952,18 +1019,12 @@ html:not(.gsap-ready) .hero-film-copy span {
   letter-spacing: 0.08em;
   color: #8a6b5e;
 }
-/* Leaflet: encaixe visual no card sem competir com o conteúdo. */
-.map-canvas .leaflet-container {
-  position: absolute;
-  inset: 0;
-  background: #e8e0d8;
-  font: inherit;
-}
-.map-canvas .leaflet-control-attribution {
+/* Leaflet: controles discretos para o mapa de fundo. */
+.features-map .leaflet-control-attribution {
   font-size: 9px;
   background: rgba(255, 255, 255, 0.8);
 }
-.map-canvas .leaflet-control-zoom a {
+.features-map .leaflet-control-zoom a {
   width: 24px;
   height: 24px;
   line-height: 24px;
@@ -983,7 +1044,9 @@ html:not(.gsap-ready) .hero-film-copy span {
   background: var(--coral);
 }
 .map-pin-court span {
-  background: var(--blue);
+  background: var(--pin-color, var(--blue));
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
 }
 .social-card {
   background: var(--blue);
@@ -1043,34 +1106,53 @@ html:not(.gsap-ready) .hero-film-copy span {
   align-items: center;
 }
 .benefit-image {
-  height: 600px;
+  height: auto;
 }
-.impact-badge {
-  position: absolute;
-  z-index: 3;
-  right: -35px;
-  bottom: 42px;
-  width: 160px;
-  height: 160px;
-  background: var(--coral);
-  color: white;
-  border-radius: 50%;
+.benefit-carousel {
+  width: min(100%, 300px);
+  margin: auto;
+  overflow: hidden;
+}
+.benefit-carousel-viewport { position: relative; overflow: hidden; outline: none; }
+.benefit-carousel-viewport:focus-visible { box-shadow: inset 0 0 0 3px var(--coral); }
+.benefit-carousel-track {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  transition: transform 0.38s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
-.impact-badge strong {
-  font: 800 24px "Manrope";
+.benefit-slide {
+  flex: 0 0 100%;
+  width: 100%;
+  aspect-ratio: 9 / 20;
+  margin: 0;
 }
-.impact-badge small {
-  line-height: 1.5;
+.benefit-slide img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.benefit-carousel-control {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  width: 30px;
+  height: 30px;
+  transform: translateY(-50%);
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.82);
+  color: #2d3948;
+  cursor: pointer;
+  font: 500 27px/24px Arial, sans-serif;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.22);
 }
+.benefit-carousel-control:hover,
+.benefit-carousel-control:focus-visible { background: white; }
+.benefit-carousel-prev { left: 9px; }
+.benefit-carousel-next { right: 9px; }
 .benefit-copy h2 {
   font-size: 47px;
 }
 .benefit-list {
   margin-top: 38px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 28px;
 }
 .benefit-list article {
   display: grid;
@@ -1084,13 +1166,46 @@ html:not(.gsap-ready) .hero-film-copy span {
   font-size: 11px;
 }
 .benefit-list h3 {
-  font: 800 17px "Manrope";
+  font: 800 15px "Manrope";
   margin: 0;
 }
 .benefit-list p {
   color: var(--muted);
   margin: 5px 0 0;
+  font-size: 13px;
   line-height: 1.5;
+}
+@media (min-width: 901px) {
+  /* Mantém os dois blocos inteiros dentro de uma viewport desktop,
+     sem abandonar o alinhamento vertical central da seção. */
+  .benefits {
+    padding: 56px 0;
+  }
+  .benefits-grid {
+    gap: 64px;
+  }
+  .benefit-carousel {
+    width: min(100%, 330px);
+  }
+  .benefit-copy h2 {
+    font-size: 42px;
+  }
+  .benefit-list {
+    margin-top: 26px;
+    column-gap: 24px;
+  }
+  .benefit-list article {
+    grid-template-columns: 36px 1fr;
+    gap: 12px;
+    padding: 14px 0;
+  }
+  .benefit-list h3 {
+    font-size: 14px;
+  }
+  .benefit-list p {
+    font-size: 12px;
+    line-height: 1.4;
+  }
 }
 .steps {
   background: var(--cream);
@@ -1318,10 +1433,7 @@ footer {
     min-height: 380px;
   }
   .benefit-image {
-    height: 450px;
-  }
-  .impact-badge {
-    right: 20px;
+    height: auto;
   }
   .footer-grid {
     grid-template-columns: 1fr 1fr;
@@ -1388,8 +1500,11 @@ footer {
   .benefits-grid {
     gap: 48px;
   }
+  .benefit-list {
+    grid-template-columns: 1fr;
+  }
   .benefit-image {
-    height: 360px;
+    height: auto;
   }
   .steps-row {
     flex-direction: column;
@@ -1468,14 +1583,6 @@ footer {
 .benefit-image {
   position: relative;
   overflow: visible;
-}
-.benefit-image > img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  border-radius: 2px;
 }
 
 @media (max-width: 600px) {
@@ -1786,11 +1893,24 @@ footer {
   color: #9fb0c5;
   margin: 16px 0 0;
 }
+.proof-visual {
+  display: grid;
+  place-items: center;
+  min-height: 628px;
+  padding: 35px 0;
+}
 .proof-visual img {
   display: block;
-  width: 100%;
+  width: min(100%, 500px);
+  max-height: 660px;
   height: auto;
+  object-fit: contain;
   border-radius: 4px;
+}
+@media (min-width: 901px) {
+  .proof {
+    padding: 60px 0;
+  }
 }
 
 /* 11. FAQ */
@@ -1944,5 +2064,128 @@ footer {
   }
   .steps-row {
     gap: 34px 0;
+  }
+}
+
+/* Faixas horizontais do desktop viram blocos verticais densos no mobile.
+   Não mantemos altura de cena nem cards altos: o conteúdo acompanha o
+   scroll natural e cabe melhor na viewport estreita. */
+@media (max-width: 900px) {
+  /* Força uma coluna: não é apenas quebra automática de flex. */
+  html.gsap-ready .journey-track.hscroll-track {
+    display: block;
+    width: 100%;
+  }
+  html.gsap-ready .journey-panel {
+    width: 100%;
+  }
+  html.gsap-ready .journey-panel .stats-grid,
+  html.gsap-ready .practice-grid.hscroll-track,
+  html.gsap-ready .steps-row.hscroll-track {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+  html.gsap-ready .practice-grid.hscroll-track > article,
+  html.gsap-ready .steps-row.hscroll-track > article {
+    width: 100%;
+    flex: none;
+  }
+  html.gsap-ready .journey-panel,
+  .practice,
+  .steps {
+    min-height: 0;
+  }
+  main section.practice.section,
+  main section.steps.section {
+    display: block;
+  }
+  html.gsap-ready .journey-panel {
+    justify-content: flex-start;
+    padding: 72px 0;
+  }
+  html.gsap-ready .journey-panel h2,
+  .practice h2,
+  .steps h2 {
+    font-size: clamp(30px, 7.5vw, 40px);
+    overflow-wrap: anywhere;
+  }
+  html.gsap-ready .journey-panel .stats-grid,
+  html.gsap-ready .journey-panel .transform-grid {
+    margin-top: 28px;
+  }
+  html.gsap-ready .journey-panel .stat-card {
+    min-height: 0;
+    padding: 20px;
+  }
+  html.gsap-ready .journey-panel .stat-icon {
+    margin: 18px 0 12px;
+  }
+  html.gsap-ready .journey-panel .stat-card h3 {
+    font-size: 19px;
+    margin-bottom: 7px;
+  }
+  .practice,
+  .steps {
+    padding: 72px 0;
+  }
+  .practice-grid.hscroll-track {
+    gap: 14px;
+    margin-top: 30px;
+  }
+  .practice-card {
+    padding: 22px 20px;
+  }
+  .practice-card h3 {
+    margin: 14px 0 7px;
+    font-size: 17px;
+  }
+  .steps-row.hscroll-track {
+    gap: 26px 0;
+    margin-top: 36px;
+  }
+  .steps-row h3 {
+    margin: 10px 0 6px;
+  }
+}
+
+@media (max-width: 600px) {
+  html.gsap-ready .journey-panel,
+  .practice,
+  .steps {
+    padding: 56px 0;
+  }
+  html.gsap-ready .journey-panel .stats-grid {
+    gap: 12px;
+  }
+  html.gsap-ready .journey-panel .stat-card {
+    padding: 18px;
+  }
+  .practice-grid.hscroll-track {
+    margin-top: 24px;
+  }
+  .steps-row.hscroll-track {
+    gap: 22px 0;
+    margin-top: 28px;
+  }
+}
+
+/* Rede do diferencial: reduzida como um único conjunto para não tocar
+   as bordas em telas estreitas. */
+@media (max-width: 900px) {
+  .network-visual {
+    width: min(100%, 440px);
+    height: 430px;
+    margin: 0 auto;
+    transform: scale(0.72);
+    transform-origin: center;
+  }
+}
+@media (max-width: 600px) {
+  .network-visual {
+    width: 100%;
+    height: 380px;
+    margin: 0 auto;
+    transform: scale(0.62);
   }
 }

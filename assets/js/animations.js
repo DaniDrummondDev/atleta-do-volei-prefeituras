@@ -183,7 +183,7 @@
    * seção. As seções pinadas (.journey, .practice, .steps) não entram
    * aqui: elas já seguram a tela por natureza.
    */
-  var LOCKED_SECTIONS = ['.network', '.features', '.benefits'];
+  var LOCKED_SECTIONS = ['.network', '.benefits'];
 
   var HARD_CAP = 5;          // segundos: nenhum lock passa disto, nunca
   var ESCAPE_ATTEMPTS = 2;   // gestos de scroll que cancelam o lock
@@ -238,8 +238,9 @@
    * @param {string}   selector  seção a observar
    * @param {Function} buildTl   recebe a seção, devolve uma timeline
    *                             PAUSADA com a sequência da seção
+   * @param {Object} [options]   ajusta o ponto de disparo/alinhamento
    */
-  function lockedScene(selector, buildTl) {
+  function lockedScene(selector, buildTl, options) {
     var section = $(selector);
     if (!section) return;
 
@@ -249,7 +250,11 @@
 
     ScrollTrigger.create({
       trigger: section,
-      start: 'top 60%',
+      // Por padrão a cena começa antes de a seção chegar ao topo. Uma
+      // seção que vem depois de uma tela inteira (como o mapa) pode
+      // optar por começar no topo para não encobrir essa tela antes da
+      // pessoa conseguir vê-la por completo.
+      start: (options && options.start) || 'top 60%',
       once: true,
       onEnter: function () {
         var failsafe;
@@ -277,7 +282,11 @@
             ? gsap.to(window, {
               duration: 0.45,
               ease: 'power2.inOut',
-              scrollTo: { y: section, offsetY: 70, autoKill: false }
+              scrollTo: {
+                y: section,
+                offsetY: options && typeof options.offsetY === 'number' ? options.offsetY : 70,
+                autoKill: false
+              }
             })
             : null;
 
@@ -312,9 +321,8 @@
   }
 
   /**
-   * Header fixo com auto-hide.
-   * - `is-stuck`  : passou do hero → fundo translúcido + altura menor.
-   * - `is-hidden` : usuário descendo → sai de cena. Volta ao subir.
+   * Header visível somente no início da página. Depois do primeiro
+   * trecho de rolagem ele permanece oculto, inclusive ao subir.
    * Nunca esconde com o menu mobile aberto.
    */
   function initHeader() {
@@ -327,11 +335,11 @@
       end: 'max',
       onUpdate: function (self) {
         var y = self.scroll();
-        header.classList.toggle('is-stuck', y > 120);
 
         var menuOpen = nav && nav.classList.contains('open');
-        var hide = self.direction === 1 && y > 320 && !menuOpen;
-        header.classList.toggle('is-hidden', hide);
+        var atPageStart = y <= 120;
+        header.classList.toggle('is-stuck', !atPageStart);
+        header.classList.toggle('is-hidden', !atPageStart && !menuOpen);
       }
     });
   }
@@ -377,8 +385,7 @@
     var court = $('.hero-film-court', film);
     var phone = $('.hero-film-phone', film);
     var outro = $('.hero-film-outro', film);
-    var copy = $$('.hero-film-copy span', film);
-    var scrollHint = $('.hero-film-scroll', hero);
+    var copy = $('.hero-film-copy', film);
 
     if (!context) return;
     var camera = { scale: 1 };
@@ -446,7 +453,9 @@
 
     gsap.set([court, phone, outro], { autoAlpha: 0 });
     gsap.set(zoom, { autoAlpha: 1 });
-    gsap.set(copy, { autoAlpha: 0, yPercent: 112 });
+    // O -50% mantém o bloco de três linhas centralizado em relação a
+    // `top: 50%`, inclusive quando o GSAP passa a controlar o transform.
+    gsap.set(copy, { autoAlpha: 1, yPercent: -50, scale: 1 });
 
     tl = gsap.timeline({
       defaults: { ease: 'none' },
@@ -466,7 +475,8 @@
       // Escritório → pixels reais da tela → abertura para a filmagem.
       .to(camera, { scale: 1, duration: 0.3 })
       .to(camera, { scale: 160, duration: 1.2, ease: 'power3.in', onUpdate: drawOffice })
-      .to(scrollHint, { autoAlpha: 0, duration: 0.18 }, 0.32)
+      // Termina antes de o conteúdo da tela ficar reconhecível.
+      .to(copy, { autoAlpha: 0, scale: 1.12, yPercent: -62, duration: 0.12, ease: 'power2.in' }, 0.35)
       .fromTo(court, { scale: 24 }, { autoAlpha: 1, scale: 1, duration: 0.65, ease: 'power2.out' }, 1.5)
       .to(zoom, { autoAlpha: 0, duration: 0.3 }, 1.5)
       .to(office, { autoAlpha: 0, duration: 0.3 }, 1.5)
@@ -475,7 +485,7 @@
       .to(outro, { autoAlpha: 1, duration: 0.5 }, 5.55)
       .to(court, { autoAlpha: 0, duration: 0.5 }, 5.55)
       .fromTo(phone, { scale: 0.82 }, { autoAlpha: 1, scale: 1, duration: 0.65 }, 5.7)
-      .to(copy, { autoAlpha: 1, yPercent: 0, stagger: 0.19, duration: 0.46 }, 6.05)
+      .to(copy, { autoAlpha: 1, scale: 1, yPercent: -50, duration: 0.46, ease: 'power2.out' }, 6.05)
       .to({}, { duration: 0.35 });
 
     mediaReady();
@@ -862,69 +872,39 @@
   }
 
   /**
-   * 7. PLATAFORMA COMPLETA — cards em "deck", com scroll travado.
-   * Os parallax internos ficam FORA da timeline travada: são contínuos
-   * e ligados ao scroll, não fazem parte da sequência de entrada.
+   * 7. PLATAFORMA COMPLETA — cabeçalho sobre o mapa.
+   *
+   * Não usa lockedScene: esta seção é uma tela inteira de contexto e o
+   * lock curto fazia o próximo lock reposicionar a página nos benefícios
+   * antes de o visitante conseguir ver o mapa.
    */
   function initFeatures() {
-    var grid = $('.feature-grid');
-    if (!grid) return;
+    var section = $('.features');
+    if (!section) return;
 
-    // Parallax contínuo do conteúdo interno de cada card.
-    $$('.feature-card', grid).forEach(function (card) {
-      if (card.classList.contains('coral-card')) return;   // mapa Leaflet: não mexer
-      var inner = $('.mini-ui, .bracket, .social-ui', card);
-      if (!inner) return;
-      gsap.to(inner, {
-        y: -22, ease: 'none',
-        scrollTrigger: { trigger: card, start: 'top bottom', end: 'bottom top', scrub: 1 }
-      });
+    var head = $('.section-head', section);
+    if (!head) return;
+
+    var tl = gsap.timeline({
+      defaults: { ease: EASE },
+      scrollTrigger: { trigger: section, start: 'top 72%', once: true }
     });
 
-    lockedScene('.features', function (section) {
-      var tl = gsap.timeline({ paused: true, defaults: { ease: EASE } });
-      var head = $('.section-head', section);
-
-      if (head) {
-        var eb = $('.eyebrow', head);
-        if (eb) tl.from(eb, { opacity: 0, y: 14, duration: 0.35 });
-        var h2 = $('h2', head);
-        if (h2) tl.from(splitWords(h2), { yPercent: 115, stagger: 0.035, duration: 0.55 }, '-=0.15');
-        var sub = $('p:not(.eyebrow)', head);
-        if (sub) tl.from(sub, { y: 18, opacity: 0, duration: 0.45 }, '-=0.3');
-      }
-
-      tl.from($$('.feature-card', section), {
-        // O card do mapa entra junto, mas sem escala: transform no
-        // canvas do Leaflet desalinha os tiles.
-        y: function (i, el) { return el.classList.contains('coral-card') ? 0 : 64; },
-        opacity: 0,
-        scale: function (i, el) { return el.classList.contains('coral-card') ? 1 : 0.96; },
-        stagger: 0.1,
-        duration: 0.6
-      }, '-=0.2');
-
-      var avatars = $$('.avatar-row img', section);
-      if (avatars.length) tl.from(avatars, { scale: 0, opacity: 0, stagger: 0.06, duration: 0.4, ease: 'back.out(2)' }, '-=0.25');
-
-      var stories = $$('.story-row i', section);
-      if (stories.length) tl.from(stories, { scale: 0, stagger: 0.05, duration: 0.35, ease: 'back.out(2)' }, '-=0.3');
-
-      return tl;
-    });
+    var eb = $('.eyebrow', head);
+    if (eb) tl.from(eb, { opacity: 0, y: 14, duration: 0.35 });
+    var h2 = $('h2', head);
+    if (h2) tl.from(splitWords(h2), { yPercent: 115, stagger: 0.035, duration: 0.55 }, '-=0.15');
+    var sub = $('p:not(.eyebrow)', head);
+    if (sub) tl.from(sub, { y: 18, opacity: 0, duration: 0.45 }, '-=0.3');
   }
 
-  /** 8. BENEFÍCIOS — imagem em parallax + numeração contando 0→N. */
+  /** 8. BENEFÍCIOS — carrossel do app + numeração contando 0→N. */
   function initBenefits() {
-    var img = $('.benefit-image img');
-    if (img) {
-      gsap.fromTo(img, { yPercent: -8 }, {
-        yPercent: 8, ease: 'none',
-        scrollTrigger: { trigger: '.benefit-image', start: 'top bottom', end: 'bottom top', scrub: 0.8 }
-      });
-      gsap.from('.impact-badge', {
-        scale: 0.6, opacity: 0, duration: 0.8, ease: 'back.out(1.6)',
-        scrollTrigger: onEnter('.benefit-image', { start: 'top 70%' })
+    var carousel = $('.benefit-carousel');
+    if (carousel) {
+      gsap.from(carousel, {
+        y: 32, opacity: 0, scale: 0.96, duration: 0.7, ease: EASE,
+        scrollTrigger: onEnter('.benefit-image', { start: 'top 75%' })
       });
     }
 
@@ -961,6 +941,11 @@
       });
 
       return tl;
+    }, {
+      // A seção anterior é o mapa em tela cheia. Não iniciamos esta
+      // cena antes que ela tenha ocupado integralmente a viewport.
+      start: 'top top',
+      offsetY: 0
     });
   }
 
@@ -1014,7 +999,7 @@
    */
   function initJourneyNav(tl, journey) {
     var rail = $('.journey-nav-rail i', journey);
-    if (rail) tl.to(rail, { scaleX: 1, ease: 'none' }, 0);
+    if (rail) tl.to(rail, { scaleX: 1, duration: 1, ease: 'none' }, 0);
 
     var items = $$('.journey-nav li', journey);
     $$('.journey-panel', journey).forEach(function (panel, i) {
@@ -1040,17 +1025,6 @@
 
     horizontalScene('.journey', {
       priority: 3,
-      // Os quatro painéis têm exatamente 100vw. Ao encerrar o gesto,
-      // escolhe o painel mais próximo do centro (portanto, o que está
-      // mais presente na tela) e o alinha por inteiro na viewport.
-      snap: {
-        snapTo: function (progress) { return Math.round(progress * 3) / 3; },
-        directional: false,
-        inertia: false,
-        delay: 0.08,
-        duration: { min: 0.18, max: 0.5 },
-        ease: 'power1.inOut'
-      },
       onTimeline: function (tl) {
         initJourneyPanels(tl);
         initJourneyNav(tl, journey);
@@ -1091,8 +1065,8 @@
         end: function () { return '+=' + (distance() + window.innerHeight * 0.4); },
         pin: true,
         scrub: 0.9,
-        // Só a jornada pede snap; as demais cenas horizontais continuam
-        // com o comportamento fluido que já tinham.
+        // Cenas horizontais ficam fluidas: o scroll vertical controla
+        // o deslocamento sem disputar o snap global entre seções.
         snap: options && options.snap,
         anticipatePin: 1,
         invalidateOnRefresh: true,
@@ -1103,7 +1077,9 @@
       }
     });
 
-    tl.to(track, { x: function () { return -distance(); }, ease: 'none' }, 0);
+    // Duração explícita: as animações filhas podem ser sincronizadas com
+    // precisão antes de a cena liberar a próxima seção.
+    tl.to(track, { x: function () { return -distance(); }, duration: 1, ease: 'none' }, 0);
 
     if (options && options.onTimeline) options.onTimeline(tl, section, track);
     return tl;
@@ -1114,22 +1090,18 @@
     horizontalScene('.practice', {
       priority: 2,
       onTimeline: function (tl, section, track) {
-        // Cada card ganha um leve "endireitar" enquanto cruza a tela.
+        // Entradas pertencem à timeline pinada, não a triggers soltos.
+        // Isso impede que o último card continue animando na seção do mapa.
         $$('.practice-card', track).forEach(function (card, i) {
-          gsap.from(card, {
+          tl.from(card, {
             rotate: i % 2 ? 3 : -3,
             y: 30,
             opacity: 0,
-            duration: 0.6,
-            ease: EASE,
-            scrollTrigger: {
-              trigger: card,
-              containerAnimation: tl,
-              start: 'left 92%',
-              once: true
-            }
-          });
+            duration: 0.34,
+            ease: EASE
+          }, 0.08 + i * 0.22);
         });
+
       }
     });
   }
@@ -1143,7 +1115,7 @@
       priority: 1,
       onTimeline: function (tl, section, track) {
         var fill = $('.steps-progress i', section);
-        if (fill) tl.to(fill, { scaleX: 1, ease: 'none' }, 0);
+        if (fill) tl.to(fill, { scaleX: 1, duration: 1, ease: 'none' }, 0);
 
         $$('article', track).forEach(function (item) {
           gsap.from($('b', item), {
@@ -1242,7 +1214,7 @@
   }
 
   function initTilt() {
-    $$('.stat-card, .practice-card, .feature-card:not(.coral-card)').forEach(function (card) {
+    $$('.stat-card, .practice-card, .feature-card').forEach(function (card) {
       var rx = gsap.quickTo(card, 'rotateX', { duration: 0.5, ease: 'power3' });
       var ry = gsap.quickTo(card, 'rotateY', { duration: 0.5, ease: 'power3' });
 
@@ -1288,17 +1260,19 @@
       return initSectionSnap('main > section, main > .journey');
     });
 
-    // Mobile: a jornada empilha; as mesmas cenas rodam na vertical.
+    // Mobile: a jornada empilha e a página usa rolagem totalmente livre.
+    // O Hero continua com sua cena pinada; as faixas horizontais não são
+    // inicializadas e nenhuma seção posterior disputa o gesto de toque.
     mm.add('(max-width: 900px)', function () {
       initJourneyPanels(null);
-      return initSectionSnap('main > section, .journey-panel');
+      return function () {};
     });
 
     // --- Só agora as cenas verticais posteriores aos pins ---
     // (o h2 da .network entra na timeline travada de initNetwork)
-    // Os h2 de .network, .features e .benefits NÃO entram aqui: eles
-    // fazem parte das timelines travadas (LOCKED_SECTIONS). Duplicar
-    // faria o título animar antes da cena e de novo dentro dela.
+    // Os h2 de .network e .benefits pertencem às timelines travadas;
+    // o de .features é animado por initFeatures(). Duplicar qualquer
+    // um deles aqui faria o título animar duas vezes.
     headingReveal('.practice h2');
     headingReveal('.steps h2');
     headingReveal('.faq h2');

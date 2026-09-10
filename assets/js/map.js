@@ -1,7 +1,8 @@
 /* ===================================================================
-   map.js — Mapa de quadras (OpenStreetMap + Leaflet)
+   map.js — Mapa de fundo da plataforma (OpenStreetMap + Leaflet)
    -------------------------------------------------------------------
-   Responsabilidade única: montar o mapa do card "Mapa de quadras",
+   Responsabilidade única: montar o mapa de fundo da seção
+   "Uma Plataforma Completa",
    centralizá-lo na região de quem está acessando o site e expor um
    ponto de extensão para, no futuro, plotar as quadras vindas do
    banco do Atleta do Vôlei.
@@ -50,7 +51,7 @@
     center: DEFAULT_CENTER,
     zoom: DEFAULT_ZOOM,
     zoomControl: false,
-    // O mapa é decorativo dentro do card: o scroll da página tem prioridade.
+    // O mapa é o plano de fundo da seção: o scroll da página tem prioridade.
     scrollWheelZoom: false,
     attributionControl: true
   });
@@ -64,6 +65,41 @@
   }).addTo(map);
 
   setStatus('');
+
+  /* ---------- Quadras demonstrativas ----------
+     Enquanto a integração com o banco não estiver conectada, exibimos
+     20 pins simulados. Ao receber quadras reais em `addCourts()`, essa
+     camada é removida para não misturar dados fictícios e reais. */
+  const DEMO_COURTS_COUNT = 20;
+  const DEMO_PIN_COLORS = ['#ff684d', '#0c4f9e', '#1f9d84', '#f2a93b', '#8b67c8'];
+  const demoCourtMarkers = L.layerGroup().addTo(map);
+
+  const demoCourtIcon = (color) => L.divIcon({
+    className: 'map-pin map-pin-court',
+    html: `<span style="--pin-color: ${color}"></span>`,
+    iconSize: [16, 16],
+    iconAnchor: [8, 8]
+  });
+
+  const renderDemoCourts = (center, zoom) => {
+    const [latitude, longitude] = center;
+    // Em zoom próximo, os pins ficam distribuídos no entorno; no
+    // enquadramento nacional, ocupam uma área maior para continuarem visíveis.
+    const latitudeRange = zoom >= 10 ? 0.06 : 11;
+    const longitudeRange = latitudeRange * 1.35;
+    demoCourtMarkers.clearLayers();
+
+    Array.from({ length: DEMO_COURTS_COUNT }, (_, index) => {
+      const lat = latitude + (Math.random() - 0.5) * latitudeRange;
+      const lng = longitude + (Math.random() - 0.5) * longitudeRange;
+      const color = DEMO_PIN_COLORS[index % DEMO_PIN_COLORS.length];
+      L.marker([lat, lng], { icon: demoCourtIcon(color), title: `Quadra esportiva ${index + 1}` })
+        .bindPopup(`<strong>Quadra esportiva ${String(index + 1).padStart(2, '0')}</strong>`)
+        .addTo(demoCourtMarkers);
+    });
+  };
+
+  renderDemoCourts(DEFAULT_CENTER, DEFAULT_ZOOM);
 
   // O card entra na tela com a animação `.reveal` (opacity/transform).
   // Leaflet mede o container no momento da criação, então precisamos
@@ -93,6 +129,7 @@
         const { latitude, longitude } = position.coords;
         setStatus('');
         map.setView([latitude, longitude], LOCATED_ZOOM);
+        renderDemoCourts([latitude, longitude], LOCATED_ZOOM);
         L.marker([latitude, longitude], { icon: youAreHereIcon })
           .addTo(map)
           .bindPopup('Você está aqui');
@@ -124,6 +161,7 @@
   const addCourts = (courts) => {
     courtMarkers.clearLayers();
     if (!Array.isArray(courts) || courts.length === 0) return;
+    demoCourtMarkers.clearLayers();
 
     courts.forEach((court) => {
       if (typeof court.lat !== 'number' || typeof court.lng !== 'number') return;

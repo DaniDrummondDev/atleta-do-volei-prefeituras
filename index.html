@@ -53,28 +53,19 @@
     <!-- 1. HERO -->
     <section class="hero hero-film-section">
       <div class="hero-film" aria-label="Da gestão de um campeonato à transformação do vôlei da cidade">
-        <img class="hero-film-scene hero-film-office" src="assets/images/hero-office-icon-small.png" alt="" fetchpriority="high">
+        <img class="hero-film-scene hero-film-office" src="assets/images/hero-office-icon-small.png" alt=""
+          fetchpriority="high">
         <canvas class="hero-film-scene hero-film-zoom" aria-hidden="true"></canvas>
-        <video class="hero-film-scene hero-film-court" data-src="assets/video/video.mp4" muted playsinline preload="auto" aria-hidden="true" disablepictureinpicture></video>
-        <img class="hero-film-phone" src="assets/images/mockup_01.png"
-          alt="Aplicativo Atleta do Vôlei em um celular" width="358" height="746">
+        <video class="hero-film-scene hero-film-court" data-src="assets/video/video.mp4" muted playsinline
+          preload="auto" aria-hidden="true" disablepictureinpicture></video>
+        <img class="hero-film-phone" src="assets/images/mockup_01.png" alt="Aplicativo Atleta do Vôlei em um celular"
+          width="358" height="746">
         <div class="hero-film-outro" aria-hidden="true"></div>
-        <h1 class="hero-film-copy"><span>Transforme o</span><span>vôlei <em>da sua</em></span><span><em>cidade.</em></span></h1>
+        <h1 class="hero-film-copy"><span>Transforme o</span><span>vôlei <em>da
+              sua</em></span><span><em>cidade.</em></span></h1>
       </div>
-      <p class="hero-film-scroll" aria-hidden="true"><span>↓</span> ROLE PARA CONHECER</p>
+      <img class="hero-film-scroll" src="assets/images/mouse.gif" alt="" width="150" height="150" aria-hidden="true">
     </section>
-
-    <!-- ================================================================
-         JORNADA HORIZONTAL — 4 painéis travados na mesma tela.
-         Ganhos → Desafio → Transformação → Posicionamento.
-
-         .journey (= .hscroll-viewport) é pinado; .journey-track desliza
-         em X. Cada <section> vira um painel de 100vw × 100vh.
-         Orquestração em animations.js §6 (initJourney).
-
-         Sem a classe `gsap-ready` no <html> estes wrappers são divs
-         neutros e as 4 seções voltam a empilhar verticalmente.
-         ================================================================ -->
     <div class="journey hscroll-viewport" id="ganhos">
       <div class="journey-track hscroll-track">
 
@@ -270,24 +261,16 @@
           </div>
         </div>
       </div>
-      <div class="container">
-        <div class="dual-band reveal delay-2">
-          <article>
-            <small>PARA A PREFEITURA</small>
-            <p>Uma modalidade inteira organizada, comunicando-se e gerando dados — sem trocar o sistema que a Secretaria
-              já usa.</p>
-          </article>
-          <article>
-            <small>PARA O ATLETA</small>
-            <p>Um aplicativo gratuito para encontrar equipes, quadras, campeonatos e pessoas que jogam vôlei na própria
-              cidade.</p>
-          </article>
-        </div>
-      </div>
     </section>
 
     <!-- 7. UMA PLATAFORMA COMPLETA -->
     <section class="features section" id="como-funciona">
+      <!-- Mapa real (OpenStreetMap via Leaflet). A lógica fica em map.js e
+           pode receber as quadras do banco por window.atletaMap.addCourts(). -->
+      <div class="features-map" id="courts-map" role="application"
+        aria-label="Mapa da região de quem está acessando o site">
+        <p class="map-status" data-map-status>Carregando o mapa…</p>
+      </div>
       <div class="container">
         <div class="section-head reveal">
           <div>
@@ -297,55 +280,6 @@
           <p>Um ecossistema que une eficiência para a prefeitura e uma experiência que as pessoas realmente querem usar.
           </p>
         </div>
-        <div class="feature-grid">
-          <article class="feature-card feature-large reveal">
-            <div class="feature-num">01</div>
-            <div class="feature-icon">♟</div>
-            <h3>Gestão de equipes</h3>
-            <p>Cadastros, convites, escalações e comunicação centralizada para organizar melhor.</p>
-            <div class="mini-ui teams-ui"><span>Equipe Municipal</span>
-              <!-- PLACEHOLDER: retratos ilustrados. Substituir pelos rostos reais
-                   (mesmos nomes de arquivo em assets/images/avatars/). -->
-              <div class="avatar-row">
-                <img src="assets/images/avatars/atleta-01.svg" alt="" width="100" height="100" loading="lazy">
-                <img src="assets/images/avatars/atleta-02.svg" alt="" width="100" height="100" loading="lazy">
-                <img src="assets/images/avatars/atleta-03.svg" alt="" width="100" height="100" loading="lazy">
-                <img src="assets/images/avatars/atleta-04.svg" alt="" width="100" height="100" loading="lazy">
-                <b>+12</b>
-              </div>
-            </div>
-          </article>
-          <article class="feature-card reveal delay-1">
-            <div class="feature-num">02</div>
-            <div class="feature-icon">♜</div>
-            <h3>Campeonatos</h3>
-            <p>Crie torneios, gerencie inscrições, tabelas, resultados e rankings.</p>
-            <div class="bracket"><span>SEMIFINAL</span><b>4 × 2</b><span>FINAL</span><b class="coral">SÁB 16H</b></div>
-          </article>
-          <article class="feature-card coral-card reveal">
-            <div class="feature-num">03</div>
-            <div class="feature-icon">⌖</div>
-            <h3>Mapa de quadras</h3>
-            <p>Valorize os espaços da cidade e facilite o acesso da população.</p>
-            <!-- Mapa real (OpenStreetMap via Leaflet). A lógica fica em map.js.
-                 Hoje mostra a região de quem acessa; no futuro receberá as quadras
-                 vindas do banco do Atleta do Vôlei — ver window.atletaMap.addCourts(). -->
-            <div class="map-canvas" id="courts-map" role="application"
-              aria-label="Mapa da região de quem está acessando o site">
-              <p class="map-status" data-map-status>Carregando o mapa…</p>
-            </div>
-          </article>
-          <article class="feature-card feature-large social-card reveal delay-1">
-            <div class="feature-num">04</div>
-            <div class="feature-icon">◎</div>
-            <h3>Rede social do vôlei</h3>
-            <p>O diferencial que gera engajamento contínuo, pertencimento e visibilidade para o esporte local.</p>
-            <div class="social-ui">
-              <div class="story-row"><i></i><i></i><i></i><i></i></div>
-              <div class="feed-line"><i></i><span></span><b>♥</b></div>
-            </div>
-          </article>
-        </div>
       </div>
     </section>
 
@@ -353,11 +287,31 @@
     <section class="benefits section">
       <div class="container benefits-grid">
         <div class="benefit-image reveal">
-          <!-- PLACEHOLDER: trocar por foto final (rapaz vendo o app + quadra de parque desfocada ao fundo) -->
-          <img src="assets/images/placeholder-beneficios.svg"
-            alt="Placeholder da imagem final: pessoa usando o aplicativo Atleta do Vôlei em um parque" width="900"
-            height="1200" loading="lazy">
-          <div class="impact-badge"><strong>+ esporte</strong><small>+ conexão<br>+ cidade</small></div>
+          <section class="benefit-carousel" aria-roledescription="carrossel"
+            aria-label="Conheça o aplicativo Atleta do Vôlei">
+            <div class="benefit-carousel-viewport" tabindex="0"
+              aria-label="Carrossel de telas do aplicativo. Use as setas do teclado ou arraste para navegar.">
+              <div class="benefit-carousel-track">
+                <figure class="benefit-slide"><img src="assets/images/tela_01.png"
+                    alt="Tela inicial do aplicativo Atleta do Vôlei" width="360" height="800"></figure>
+                <figure class="benefit-slide"><img src="assets/images/tela_02.png"
+                    alt="Tela de recursos do aplicativo Atleta do Vôlei" width="360" height="800" loading="lazy">
+                </figure>
+                <figure class="benefit-slide"><img src="assets/images/tela_03.png"
+                    alt="Tela de comunidade do aplicativo Atleta do Vôlei" width="360" height="800" loading="lazy">
+                </figure>
+                <figure class="benefit-slide"><img src="assets/images/tela_04.png"
+                    alt="Tela de partidas do aplicativo Atleta do Vôlei" width="360" height="800" loading="lazy">
+                </figure>
+                <figure class="benefit-slide"><img src="assets/images/tela_05.png"
+                    alt="Tela de perfil do aplicativo Atleta do Vôlei" width="360" height="800" loading="lazy"></figure>
+              </div>
+              <button class="benefit-carousel-control benefit-carousel-prev" type="button"
+                aria-label="Ver tela anterior">‹</button>
+              <button class="benefit-carousel-control benefit-carousel-next" type="button"
+                aria-label="Ver próxima tela">›</button>
+            </div>
+          </section>
         </div>
         <div class="benefit-copy reveal delay-1">
           <p class="eyebrow"><span></span> BENEFÍCIOS</p>
@@ -443,7 +397,7 @@
       </div>
     </section>
 
-    <!-- 10. CASE / PROVA — ativar quando houver município utilizando -->
+    <!-- 10. CASE / PROVA -->
     <section class="proof section">
       <div class="container proof-grid">
         <div class="proof-copy reveal">
@@ -451,20 +405,16 @@
           <h2>Já está <em>acontecendo.</em></h2>
           <p class="proof-lead">Veja como o Atleta do Vôlei pode transformar a experiência esportiva de um município.
           </p>
-          <!-- PLACEHOLDER DE MÉTRICAS: substituir pelos números reais do município parceiro.
-               Enquanto não houver dados verificados, manter os rótulos "em breve" — não publicar números estimados. -->
-          <div class="proof-stats">
-            <div><strong>—</strong><small>atletas</small></div>
-            <div><strong>—</strong><small>equipes</small></div>
-            <div><strong>—</strong><small>eventos</small></div>
-            <div><strong>—</strong><small>quadras</small></div>
+          <div class="proof-stats" aria-live="polite">
+            <div><strong data-proof-counter="athletes">1.123</strong><small>atletas</small></div>
+            <div><strong data-proof-counter="teams">48</strong><small>equipes</small></div>
+            <div><strong data-proof-counter="events">17</strong><small>eventos</small></div>
+            <div><strong data-proof-counter="courts">52</strong><small>quadras</small></div>
           </div>
-          <p class="proof-note">Números do primeiro município parceiro em breve.</p>
         </div>
         <div class="proof-visual reveal delay-1">
-          <!-- PLACEHOLDER: trocar pela foto/depoimento do município -->
-          <img src="assets/images/placeholder-case.svg" alt="Placeholder da imagem do município parceiro" width="1200"
-            height="800" loading="lazy">
+          <img src="assets/images/mockup_02.png" alt="Aplicativo Atleta do Vôlei em um celular" width="1034"
+            height="1922" loading="lazy">
         </div>
       </div>
     </section>

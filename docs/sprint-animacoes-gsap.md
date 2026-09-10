@@ -46,7 +46,7 @@ nunca animam o mesmo elemento.
 | `body { overflow-x: clip }` sob `gsap-ready` | `hidden` cria containing block e quebra o `position:fixed` do pin do ScrollTrigger. `clip` corta igual sem esse efeito |
 | `scroll-behavior: smooth` desligado; âncoras via ScrollToPlugin | Scroll suave nativo disputa a posição com o pin e erra o alvo |
 | Split de texto próprio (`splitWords`/`splitChars`) | SplitText é plugin pago. O nosso caminha na árvore e preserva `<em>`, `<span>`, `<br>` — o `<h1>` do hero depende disso |
-| Card do mapa (`.coral-card`) só faz fade | Transform contínuo desalinha o canvas do Leaflet e força re-render |
+| Cards da plataforma entram com a mesma animação | O mapa Leaflet está no plano de fundo da seção, fora das transformações dos cards |
 | `ScrollTrigger.refresh()` em `load`, `fonts.ready` e `+1200ms` | O mapa monta assíncrono e muda a altura da seção; sem refresh todos os triggers abaixo ficam deslocados |
 | Cenas pinadas só em `min-width: 901px`, via `gsap.matchMedia` | Pin em mobile prejudica leitura e desempenho; o matchMedia desmonta e restaura sozinho no resize |
 | Scroll horizontal pina o `.hscroll-viewport` (100vh) e não a `<section>` | Pinar um elemento mais alto que a viewport corta conteúdo |

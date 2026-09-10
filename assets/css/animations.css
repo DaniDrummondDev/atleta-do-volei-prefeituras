@@ -149,6 +149,18 @@ html.gsap-ready .hscroll-viewport {
   margin-top: 0;
 }
 
+/* Durante o pin, o viewport de "Na prática" vira position:fixed. Sem
+   uma camada própria, a seção do mapa (posterior no DOM) é pintada por
+   cima antes da última animação dos cards terminar. A superfície opaca
+   e o z-index mantêm os cards na frente até o unpin. */
+html.gsap-ready .practice .hscroll-viewport {
+  z-index: 3;
+  background: var(--cream);
+}
+html.gsap-ready .features {
+  z-index: 1;
+}
+
 html.gsap-ready .hscroll-track {
   display: flex;
   align-items: stretch;
@@ -267,6 +279,30 @@ html.gsap-ready .journey-panel {
      especificidade (0,2,1 contra 0,1,0) — sem !important. */
   padding: 96px 0 76px;
   overflow: hidden;
+}
+
+/* As seções com trilha horizontal já ocupam toda a viewport; retirar o
+   padding externo evita que a altura do conteúdo ultrapasse 100vh. */
+@media (min-width: 901px) {
+  html.gsap-ready .practice.section,
+  html.gsap-ready .steps.section {
+    padding-top: 0;
+    padding-bottom: 0;
+
+    /* CRÍTICO — não transformar estas seções em flex container.
+       O ScrollTrigger envolve o .hscroll-viewport num .pin-spacer e
+       reserva a altura do pin como padding-bottom do spacer. Dentro de
+       um flex-column (regra `main section:not(.hero):not(.journey-panel)`
+       em styles.css) essa reserva não vira altura: o spacer vira um flex
+       item com `flex-shrink: 1` e a seção continua com 100vh. O pin então
+       consome scroll sem alongar o documento e, ao terminar, o viewport
+       fica deslocado para baixo por toda a duração do pin — cobrindo a
+       seção seguinte (.features/o mapa), que aparecia como uma faixa fina.
+       Em block, o padding do spacer vira altura real e cada seção volta a
+       ocupar exatamente 100vh. */
+    display: block;
+    height: auto;
+  }
 }
 
 /* `.container` tem `margin: auto`. Num flex-column isso vira margem
@@ -474,7 +510,9 @@ html.gsap-ready .practice-grid {
     flex: none;
     width: auto;
     height: auto;
-    display: block;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     padding: 110px 0;
     overflow: visible;
   }

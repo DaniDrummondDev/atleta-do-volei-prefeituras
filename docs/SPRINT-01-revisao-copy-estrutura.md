@@ -32,10 +32,8 @@ inferior do logo de azul para branco.
    o "pill" branco atrás do logo no rodapé (`.brand-footer { background:#fff }`) foi removido.
    *Para regerar:* recolorir os paths de índice 13 a 31 do SVG original.
 
-2. **Sobreposição na seção "Plataforma completa"** — os mini-UIs (`.mini-ui`, `.bracket`,
-   `.map-ui`, `.social-ui`) eram `position:absolute` e cobriam os parágrafos. Agora o
-   `.feature-card` é `display:flex; flex-direction:column` e cada mini-UI usa
-   `margin-top:auto` — o texto nunca é coberto, independente do comprimento.
+2. **Mapa na seção "Plataforma completa"** — o OpenStreetMap ocupa todo o fundo da seção,
+   com uma sobreposição clara que preserva a legibilidade do título e da descrição.
 
 3. **Case sem métricas** — os números aparecem como `—` com a nota "Números do primeiro
    município parceiro em breve". Há comentário HTML explícito proibindo números estimados.
@@ -73,7 +71,7 @@ assets/images/placeholder-case.svg          # NOVO — trocar pela foto do munic
 
 ## Adendo — Mapa de quadras com OpenStreetMap
 
-O card 03 deixou de ter um mapa desenhado em CSS e passou a exibir um mapa real
+A seção “Uma Plataforma Completa” usa um mapa real como plano de fundo
 (OpenStreetMap via Leaflet 1.9.4, carregado por CDN com SRI).
 
 - **`map.js`** é um arquivo próprio, com responsabilidade única. Centraliza o mapa na região
@@ -82,10 +80,8 @@ O card 03 deixou de ter um mapa desenhado em CSS e passou a exibir um mapa real
 - **Integração futura com o banco:** `window.atletaMap.addCourts([{nome, lat, lng, nota}])`
   já plota marcadores, popups e reenquadra o mapa. Basta buscar os dados do Atleta do Vôlei
   e chamar essa função — nenhuma outra parte precisa mudar.
-- **Layout:** `.map-canvas` usa `flex: 1` (mín. 215 px), então o mapa consome toda a sobra
-  vertical do card — menos laranja no topo, mais mapa. O espaçamento entre o número do card
-  e o ícone caiu de `35px` para `16px` na regra única `.feature-icon`, o que reduz o vazio
-  nos **quatro** cards e preserva a simetria entre o laranja e o azul.
+- **Layout:** `.features-map` ocupa toda a seção e recebe uma sobreposição clara para manter
+  a leitura do conteúdo e dos cards.
 - `scrollWheelZoom` está desligado de propósito: o mapa vive dentro de uma landing page e o
   scroll da página tem prioridade. O zoom fica nos botões.
 - **Atenção:** a geolocalização do navegador só funciona em **HTTPS** (ou `localhost`). Ao
