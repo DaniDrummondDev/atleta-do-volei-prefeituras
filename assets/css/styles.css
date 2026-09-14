@@ -10,6 +10,20 @@
   --line: #dbe1e7;
   --shadow: 0 24px 70px rgba(2, 25, 58, 0.14);
 }
+@font-face {
+  font-family: "TT Firs Neue";
+  src: url("../fonts/TT Firs Neue Trial Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "TT Firs Neue";
+  src: url("../fonts/TT Firs Neue Trial DemiBold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
 * {
   box-sizing: border-box;
 }
@@ -1398,6 +1412,43 @@ html:not(.gsap-ready) .hero-film-copy-start {
   .benefit-pagination { position: static; display: flex; gap: 16px; margin: 10px 0 0; padding: 18px 0 0; border-left: 0; border-top: 1px solid #aeb4b9; overflow-x: auto; }
   .benefit-pagination li { margin: 0; }
   .benefit-pagination button { font-size: 14px; }
+}
+
+/* BENEFÍCIOS — composição editorial controlada pelo scroll. */
+.benefits { padding: 0; background: #fff; }
+.benefits .benefits-scene { display: grid; grid-template-columns: minmax(360px, 41%) 1fr; width: 100%; min-height: 100vh; }
+.benefits .benefit-image { position: relative; top: auto; align-self: stretch; min-height: 100%; overflow: hidden; background: #111; }
+.benefits .benefit-slide { position: absolute; inset: 0; display: block; margin: 0; opacity: 0; transform: scale(1.03); transition: opacity .45s ease, transform .7s ease; }
+.benefits .benefit-slide.is-active { opacity: 1; transform: none; }
+.benefits .benefit-slide > img { width: 60%; height: 100%; object-fit: cover; filter: none; }
+.benefits .benefit-slide::after { content: ""; position: absolute; inset: 45% 21% 0 0; background: linear-gradient(transparent, rgba(0,0,0,.9)); }
+.benefits .benefit-slide > b { position: absolute; z-index: 2; top: 50%; right: -0.08em; margin: 0; color: rgba(255,255,255,.24); font: 400 clamp(58px, 7vw, 122px)/.8 "TT Firs Neue", sans-serif; letter-spacing: -.09em; writing-mode: vertical-rl; transform: translateY(-50%) rotate(180deg); }
+.benefits .benefit-slide figcaption { position: absolute; z-index: 3; left: clamp(32px, 4vw, 70px); right: 23%; bottom: clamp(42px, 6vh, 90px); display: grid; color: #fff; font-family: "TT Firs Neue", sans-serif; }
+.benefits .benefit-slide figcaption img { width: 54px; height: 54px; object-fit: contain; margin-bottom: 23px; filter: brightness(0) invert(1); }
+.benefits .benefit-slide figcaption strong { font: 600 clamp(21px, 2vw, 31px)/1.12 "TT Firs Neue", sans-serif; }
+.benefits .benefit-slide figcaption span { margin-top: 11px; font: 400 clamp(18px, 1.55vw, 25px)/1.16 "TT Firs Neue", sans-serif; }
+.benefits .benefit-copy { position: relative; min-width: 0; padding: clamp(48px, 9vh, 120px) clamp(56px, 7vw, 130px); font-family: "TT Firs Neue", sans-serif; }
+.benefits .benefit-copy .eyebrow { margin: 0 0 clamp(45px, 6vh, 78px); color: #5f5f5f; font: 400 24px/1 "TT Firs Neue", sans-serif; letter-spacing: 0; }
+.benefits .benefit-copy .eyebrow span { width: 48px; height: 2px; margin-right: 16px; background: #f04a20; }
+.benefits .benefit-copy h2 { max-width: 760px; margin: 0; color: #111; font: 400 clamp(54px, 5.4vw, 94px)/1.02 "TT Firs Neue", sans-serif; letter-spacing: -.055em; }
+.benefits .benefit-copy h2 span { color: #f04a20; font-weight: 600; }
+.benefits .benefit-list { position: relative; height: clamp(230px, 28vh, 330px); max-width: 540px; margin: clamp(55px, 7vh, 92px) 0 0; border-top: 1px solid #d4d4d4; }
+.benefits .benefit-list article { position: absolute; inset: 0; display: block; min-height: 0; padding-top: clamp(34px, 5vh, 55px); border: 0; opacity: 0; transform: translateY(12px); pointer-events: none; transition: opacity .35s ease, transform .4s ease; }
+.benefits .benefit-list article.is-active { opacity: 1; transform: none; pointer-events: auto; }
+.benefits .benefit-list b { display: block; color: #f04a20; font: 600 clamp(30px, 2.5vw, 42px)/1 "TT Firs Neue", sans-serif; }
+.benefits .benefit-list h3 { margin: 20px 0 0; color: #5f5f5f; font: 400 clamp(24px, 2vw, 33px)/1.12 "TT Firs Neue", sans-serif; letter-spacing: .05em; text-transform: uppercase; }
+.benefits .benefit-list p { max-width: 540px; margin: 25px 0 0; color: #161616; font: 400 clamp(23px, 1.9vw, 31px)/1.15 "TT Firs Neue", sans-serif; }
+.benefits .benefit-pagination { position: absolute; top: 17%; right: clamp(32px, 4vw, 74px); display: grid; gap: clamp(27px, 3.4vh, 46px); margin: 0; padding: 25px 0 25px 30px; border-top: 0; border-left: 1px solid #aaa; }
+.benefits .benefit-pagination li { margin: 0; }
+.benefits .benefit-pagination button { color: #666; font: 400 21px/1 "TT Firs Neue", sans-serif; }
+.benefits .benefit-pagination button.is-active { color: #f04a20; font-weight: 600; transform: none; }
+@media (max-width: 900px) {
+  .benefits .benefits-scene { display: block; }
+  .benefits .benefit-image { height: 620px; }
+  .benefits .benefit-copy { padding: 58px 28px; }
+  .benefits .benefit-copy h2 { font-size: clamp(48px, 12vw, 70px); }
+  .benefits .benefit-pagination { position: static; display: flex; margin-top: 36px; padding: 18px 0 0; border-left: 0; border-top: 1px solid #aaa; }
+  .benefits .benefit-list { height: 300px; }
 }
 .steps {
   background: var(--cream);

@@ -967,39 +967,31 @@
 
     setActive(0);
 
-    if (carousel) {
-      gsap.from(carousel, {
-        y: 32, opacity: 0, scale: 0.96, duration: 0.7, ease: EASE,
-        scrollTrigger: onEnter('.benefit-image', { start: 'top 75%' })
-      });
-    }
-
-    if (copy) {
-      var intro = gsap.timeline({ defaults: { ease: EASE }, scrollTrigger: { trigger: copy, start: 'top 75%', once: true } });
-      var eb = $('.eyebrow', copy);
-      if (eb) intro.from(eb, { opacity: 0, y: 14, duration: 0.35 });
-      var h2 = $('h2', copy);
-      if (h2) intro.from(splitWords(h2), { yPercent: 115, stagger: 0.035, duration: 0.55 }, '-=0.15');
-    }
-
-    items.forEach(function (item, index) {
+    // Em telas pequenas, o conteúdo fica empilhado e a paginação ainda
+    // permite trocar a composição sem pin vertical.
+    if (window.innerWidth > 900) {
       ScrollTrigger.create({
-        trigger: item,
-        start: 'top 58%',
-        end: 'bottom 58%',
-        onToggle: function (self) { if (self.isActive) setActive(index); }
+        trigger: section,
+        start: 'top top',
+        end: function () { return '+=' + window.innerHeight * (items.length - 1); },
+        pin: true,
+        scrub: 0.45,
+        anticipatePin: 1,
+        invalidateOnRefresh: true,
+        refreshPriority: 1,
+        snap: { snapTo: 1 / (items.length - 1), duration: { min: 0.16, max: 0.42 }, ease: 'power1.inOut' },
+        onUpdate: function (self) { setActive(Math.min(items.length - 1, Math.floor(self.progress * items.length))); }
       });
-    });
+    }
 
     buttons.forEach(function (button, index) {
       button.addEventListener('click', function () {
-        var target = items[index];
-        if (!target) return;
         setActive(index);
         if (window.ScrollToPlugin) {
-          gsap.to(window, { duration: 0.65, ease: 'power2.inOut', scrollTo: { y: target, offsetY: window.innerHeight * 0.38 } });
-        } else {
-          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          var trigger = ScrollTrigger.getAll().find(function (candidate) { return candidate.trigger === section && candidate.vars.pin; });
+          if (trigger) {
+            gsap.to(window, { duration: 0.65, ease: 'power2.inOut', scrollTo: trigger.start + (trigger.end - trigger.start) * index / (items.length - 1) });
+          }
         }
       });
     });
