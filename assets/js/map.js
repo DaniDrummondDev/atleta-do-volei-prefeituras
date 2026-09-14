@@ -1,5 +1,5 @@
 /* ===================================================================
-   map.js — Mapa de fundo da plataforma (OpenStreetMap + Leaflet)
+   map.js — Mapa de fundo da plataforma (CARTO + Leaflet)
    -------------------------------------------------------------------
    Responsabilidade única: montar o mapa de fundo da seção
    "Uma Plataforma Completa",
@@ -58,10 +58,15 @@
 
   L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    // Atribuição é exigida pela política de uso dos tiles do OpenStreetMap.
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  // O endpoint público tile.openstreetmap.org é comunitário e pode
+  // bloquear aplicações web. Usamos a CDN de basemaps da CARTO, própria
+  // para entregar esta camada visual em produção. Os dados geográficos
+  // continuam sendo do OpenStreetMap, portanto ambas as atribuições são
+  // exibidas pelo controle nativo do Leaflet.
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=cb1_3kbn_1_b6b2bdc63c96b204a284f1a9', {
+    maxZoom: 20,
+    subdomains: 'abcd',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
   }).addTo(map);
 
   setStatus('');

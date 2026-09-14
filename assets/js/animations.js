@@ -1296,6 +1296,11 @@
        ================================================================ */
     var mm = gsap.matchMedia();
 
+    // A rede vem logo após o hero, antes da primeira faixa horizontal.
+    // Inicializá-la antes dos pins mantém seus gatilhos no mesmo fluxo
+    // visual e evita que o refresh use offsets da ordem anterior.
+    initNetwork();
+
     mm.add(DESKTOP, function () {
       initJourneyScene();   // 4 painéis horizontais — prioridade 3
       initPracticeScene();  // Na prática              — prioridade 2
@@ -1328,7 +1333,6 @@
       eyebrowReveal(eb, null);
     });
 
-    initNetwork();
     initFeatures();
     initBenefits();
     initTail();

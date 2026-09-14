@@ -1701,6 +1701,9 @@ footer {
   .floating-card {
     animation: none;
   }
+  .proof-visual img {
+    animation: none;
+  }
 }
 
 /* Identidade e mockup oficiais */
@@ -2065,6 +2068,20 @@ footer {
   height: auto;
   object-fit: contain;
   border-radius: 4px;
+  transform-origin: 50% 55%;
+  will-change: transform;
+  animation: proof-mockup-float 6.8s ease-in-out infinite;
+}
+@keyframes proof-mockup-float {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) rotate(-0.7deg);
+  }
+  32% {
+    transform: translate3d(7px, -12px, 0) rotate(0.8deg);
+  }
+  68% {
+    transform: translate3d(-5px, -5px, 0) rotate(-0.35deg);
+  }
 }
 @media (min-width: 901px) {
   .proof {
