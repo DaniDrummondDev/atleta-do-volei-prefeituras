@@ -394,7 +394,8 @@
     var court = $('.hero-film-court', film);
     var phone = $('.hero-film-phone', film);
     var outro = $('.hero-film-outro', film);
-    var copy = $('.hero-film-copy', film);
+    var startCopy = $('.hero-film-copy-start', film);
+    var endCopy = $('.hero-film-copy-end', film);
     // Fica FORA de .hero-film (é irmão dele dentro de .hero).
     var scrollHint = $('.hero-film-scroll', hero);
 
@@ -476,7 +477,8 @@
     gsap.set(zoom, { autoAlpha: 1 });
     // O -50% mantém o bloco de três linhas centralizado em relação a
     // `top: 50%`, inclusive quando o GSAP passa a controlar o transform.
-    gsap.set(copy, { autoAlpha: 1, yPercent: -50, scale: 1 });
+    gsap.set(startCopy, { autoAlpha: 1, yPercent: -50, scale: 1 });
+    gsap.set(endCopy, { autoAlpha: 0, yPercent: -50, scale: 1 });
 
     tl = gsap.timeline({
       defaults: { ease: 'none' },
@@ -519,7 +521,7 @@
       .to(camera, { scale: 1, duration: 0.3 })
       .to(camera, { scale: 160, duration: 1.2, ease: 'power3.in', onUpdate: drawOffice })
       // Termina antes de o conteúdo da tela ficar reconhecível.
-      .to(copy, { autoAlpha: 0, scale: 1.12, yPercent: -62, duration: 0.12, ease: 'power2.in' }, 0.35)
+      .to(startCopy, { autoAlpha: 0, scale: 1.12, yPercent: -62, duration: 0.12, ease: 'power2.in' }, 0.35)
       .fromTo(court, { scale: 24 }, { autoAlpha: 1, scale: 1, duration: 0.65, ease: 'power2.out' }, 1.5)
       .to(zoom, { autoAlpha: 0, duration: 0.3 }, 1.5)
       .to(office, { autoAlpha: 0, duration: 0.3 }, 1.5)
@@ -528,7 +530,7 @@
       .to(outro, { autoAlpha: 1, duration: 0.5 }, 5.55)
       .to(court, { autoAlpha: 0, duration: 0.5 }, 5.55)
       .fromTo(phone, { scale: 0.82 }, { autoAlpha: 1, scale: 1, duration: 0.65 }, 5.7)
-      .to(copy, { autoAlpha: 1, scale: 1, yPercent: -50, duration: 0.46, ease: 'power2.out' }, 6.05)
+      .to(endCopy, { autoAlpha: 1, scale: 1, yPercent: -50, duration: 0.46, ease: 'power2.out' }, 6.05)
       .to({}, { duration: 0.35 });
 
     mediaReady();

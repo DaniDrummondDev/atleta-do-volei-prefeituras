@@ -543,7 +543,7 @@ html.gsap-ready .hero.hero-film-section.is-pinned {
   background-image: linear-gradient(30deg, transparent 48%, rgba(255, 255, 255, 0.09) 49%, rgba(255, 255, 255, 0.09) 51%, transparent 52%);
   background-size: 80px 80px;
 }
-.hero h1.hero-film-copy {
+.hero .hero-film-copy {
   position: absolute;
   z-index: 8;
   top: 50%;
@@ -617,7 +617,7 @@ html.gsap-ready .hero.hero-film-section.is-pinned {
      internos são posicionados em unidades `svh` — assim continuam
      onde estavam antes, dentro da área sempre visível, em vez de
      escorregarem para trás da toolbar junto com o palco maior. */
-  .hero h1.hero-film-copy {
+  .hero .hero-film-copy {
     top: 29svh;
     left: 50%;
     width: 86vw;
@@ -644,7 +644,7 @@ html.gsap-ready .hero.hero-film-section.is-pinned {
 }
 
 @media (max-width: 600px) {
-  .hero h1.hero-film-copy {
+  .hero .hero-film-copy {
     top: 29svh;
     left: 50%;
     width: 86vw;
@@ -690,6 +690,9 @@ html:not(.gsap-ready) .hero-film-phone {
 }
 html:not(.gsap-ready) .hero-film-copy span {
   transform: none !important;
+}
+html:not(.gsap-ready) .hero-film-copy-start {
+  display: none;
 }
 .statement {
   text-align: center;
