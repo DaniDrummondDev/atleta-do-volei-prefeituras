@@ -943,9 +943,30 @@
     if (sub) tl.from(sub, { y: 18, opacity: 0, duration: 0.45 }, '-=0.3');
   }
 
-  /** 8. BENEFÍCIOS — carrossel do app + numeração contando 0→N. */
+  /** 8. BENEFÍCIOS — imagem e conteúdo avançam juntos pelo scroll. */
   function initBenefits() {
-    var carousel = $('.benefit-carousel');
+    var section = $('.benefits');
+    if (!section) return;
+
+    var copy = $('.benefit-copy', section);
+    var carousel = $('.benefit-carousel', section);
+    var slides = $$('.benefit-slide', section);
+    var items = $$('.benefit-list article', section);
+    var buttons = $$('.benefit-pagination button', section);
+
+    var setActive = function (index) {
+      slides.forEach(function (slide, i) { slide.classList.toggle('is-active', i === index); });
+      items.forEach(function (item, i) { item.classList.toggle('is-active', i === index); });
+      buttons.forEach(function (button, i) {
+        var active = i === index;
+        button.classList.toggle('is-active', active);
+        if (active) button.setAttribute('aria-current', 'step');
+        else button.removeAttribute('aria-current');
+      });
+    };
+
+    setActive(0);
+
     if (carousel) {
       gsap.from(carousel, {
         y: 32, opacity: 0, scale: 0.96, duration: 0.7, ease: EASE,
@@ -953,44 +974,34 @@
       });
     }
 
-    lockedScene('.benefits', function (section) {
-      var tl = gsap.timeline({ paused: true, defaults: { ease: EASE } });
-      var copy = $('.benefit-copy', section);
+    if (copy) {
+      var intro = gsap.timeline({ defaults: { ease: EASE }, scrollTrigger: { trigger: copy, start: 'top 75%', once: true } });
+      var eb = $('.eyebrow', copy);
+      if (eb) intro.from(eb, { opacity: 0, y: 14, duration: 0.35 });
+      var h2 = $('h2', copy);
+      if (h2) intro.from(splitWords(h2), { yPercent: 115, stagger: 0.035, duration: 0.55 }, '-=0.15');
+    }
 
-      if (copy) {
-        var eb = $('.eyebrow', copy);
-        if (eb) tl.from(eb, { opacity: 0, y: 14, duration: 0.35 });
-        var h2 = $('h2', copy);
-        if (h2) tl.from(splitWords(h2), { yPercent: 115, stagger: 0.035, duration: 0.55 }, '-=0.15');
-      }
-
-      $$('.benefit-list article', section).forEach(function (item) {
-        tl.from(item, { x: 40, opacity: 0, duration: 0.4 }, '-=0.22');
-
-        // Contador: sobe de 0 até o número já impresso no HTML.
-        var num = $('b', item);
-        if (!num) return;
-        var target = parseInt(num.textContent, 10);
-        if (isNaN(target)) return;
-
-        var counter = { v: 0 };
-        tl.to(counter, {
-          v: target,
-          duration: 0.45,
-          ease: 'power1.out',
-          snap: { v: 1 },
-          onUpdate: function () {
-            num.textContent = String(Math.round(counter.v)).padStart(2, '0');
-          }
-        }, '-=0.35');
+    items.forEach(function (item, index) {
+      ScrollTrigger.create({
+        trigger: item,
+        start: 'top 58%',
+        end: 'bottom 58%',
+        onToggle: function (self) { if (self.isActive) setActive(index); }
       });
+    });
 
-      return tl;
-    }, {
-      // A seção anterior é o mapa em tela cheia. Não iniciamos esta
-      // cena antes que ela tenha ocupado integralmente a viewport.
-      start: 'top top',
-      offsetY: 0
+    buttons.forEach(function (button, index) {
+      button.addEventListener('click', function () {
+        var target = items[index];
+        if (!target) return;
+        setActive(index);
+        if (window.ScrollToPlugin) {
+          gsap.to(window, { duration: 0.65, ease: 'power2.inOut', scrollTo: { y: target, offsetY: window.innerHeight * 0.38 } });
+        } else {
+          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      });
     });
   }
 
@@ -1200,6 +1211,13 @@
       });
     };
 
+    var isInsideScrollDrivenSection = function (scrollPosition) {
+      return $$('.benefits').some(function (section) {
+        var start = section.getBoundingClientRect().top + window.scrollY;
+        return scrollPosition >= start && scrollPosition <= start + section.offsetHeight;
+      });
+    };
+
     snapTrigger = ScrollTrigger.create({
       start: 0,
       end: 'max',
@@ -1208,9 +1226,9 @@
           var maxScroll = snapTrigger.end - snapTrigger.start;
           var scrollPosition = snapTrigger.start + progress * maxScroll;
 
-          // A jornada, "Na prática" e "Como implementamos" precisam
-          // manter o scroll livre para conduzir suas faixas horizontais.
-          if (isInsidePinnedScene(scrollPosition)) return progress;
+          // As faixas pinadas e os Benefícios precisam manter o scroll
+          // livre para conduzir seus respectivos conteúdos.
+          if (isInsidePinnedScene(scrollPosition) || isInsideScrollDrivenSection(scrollPosition)) return progress;
 
           var targets = $$(selector).map(function (section) {
             return section.getBoundingClientRect().top + window.scrollY;

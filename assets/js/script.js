@@ -14,44 +14,6 @@ navigation.querySelectorAll('a').forEach((link) => {
   });
 });
 
-/* Carrossel da seção de benefícios: teclado e gesto de arrastar,
-   sem reprodução automática para não interromper a leitura. */
-document.querySelectorAll('.benefit-carousel').forEach((carousel) => {
-  const track = carousel.querySelector('.benefit-carousel-track');
-  const slides = Array.from(carousel.querySelectorAll('.benefit-slide'));
-  const viewport = carousel.querySelector('.benefit-carousel-viewport');
-  const previous = carousel.querySelector('.benefit-carousel-prev');
-  const next = carousel.querySelector('.benefit-carousel-next');
-  let active = 0;
-  let touchStart = null;
-
-  const setActive = (index) => {
-    active = (index + slides.length) % slides.length;
-    track.style.transform = `translateX(-${active * 100}%)`;
-    slides.forEach((slide, slideIndex) => {
-      slide.setAttribute('aria-hidden', String(slideIndex !== active));
-    });
-  };
-
-  previous.addEventListener('click', () => setActive(active - 1));
-  next.addEventListener('click', () => setActive(active + 1));
-  viewport.addEventListener('keydown', (event) => {
-    if (event.key === 'ArrowLeft') { event.preventDefault(); setActive(active - 1); }
-    if (event.key === 'ArrowRight') { event.preventDefault(); setActive(active + 1); }
-  });
-  viewport.addEventListener('touchstart', (event) => {
-    touchStart = event.changedTouches[0].clientX;
-  }, { passive: true });
-  viewport.addEventListener('touchend', (event) => {
-    if (touchStart === null) return;
-    const distance = event.changedTouches[0].clientX - touchStart;
-    if (Math.abs(distance) > 35) setActive(active + (distance < 0 ? 1 : -1));
-    touchStart = null;
-  }, { passive: true });
-
-  setActive(0);
-});
-
 /* CASE — altere `baseDate` e os valores `base` abaixo quando os números
    publicados forem atualizados. A soma diária é pseudoaleatória, porém
    determinística: cada visitante vê o mesmo valor para cada dia. */

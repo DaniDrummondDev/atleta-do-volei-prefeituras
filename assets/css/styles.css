@@ -1263,111 +1263,141 @@ html:not(.gsap-ready) .hero-film-copy-start {
 }
 .benefits-grid {
   display: grid;
-  grid-template-columns: 0.9fr 1.1fr;
-  gap: 80px;
-  align-items: center;
+  grid-template-columns: minmax(280px, 0.74fr) minmax(0, 1.26fr);
+  gap: clamp(48px, 7vw, 112px);
+  align-items: start;
 }
 .benefit-image {
-  height: auto;
+  position: sticky;
+  top: 11vh;
+  align-self: start;
 }
 .benefit-carousel {
-  width: min(100%, 300px);
-  margin: auto;
+  position: relative;
+  height: min(76vh, 720px);
+  min-height: 520px;
+  background: #121212;
   overflow: hidden;
+  isolation: isolate;
 }
-.benefit-carousel-viewport { position: relative; overflow: hidden; outline: none; }
-.benefit-carousel-viewport:focus-visible { box-shadow: inset 0 0 0 3px var(--coral); }
-.benefit-carousel-track {
-  display: flex;
-  transition: transform 0.38s cubic-bezier(0.22, 0.61, 0.36, 1);
-}
-.benefit-slide {
-  flex: 0 0 100%;
-  width: 100%;
-  aspect-ratio: 9 / 20;
-  margin: 0;
-}
-.benefit-slide img { display: block; width: 100%; height: 100%; object-fit: contain; }
-.benefit-carousel-control {
+.benefit-carousel::after {
+  content: "";
   position: absolute;
   z-index: 1;
+  inset: 42% 0 0;
+  pointer-events: none;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.74));
+}
+.benefit-carousel-label {
+  position: absolute;
+  z-index: 3;
+  right: -0.1em;
   top: 50%;
-  width: 30px;
-  height: 30px;
-  transform: translateY(-50%);
-  border: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.82);
-  color: #2d3948;
-  cursor: pointer;
-  font: 500 27px/24px Arial, sans-serif;
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.22);
+  margin: 0;
+  color: rgba(255, 255, 255, 0.18);
+  font: 800 clamp(42px, 6.4vw, 96px)/0.8 "Manrope", sans-serif;
+  letter-spacing: -0.09em;
+  writing-mode: vertical-rl;
+  transform: translateY(-50%) rotate(180deg);
 }
-.benefit-carousel-control:hover,
-.benefit-carousel-control:focus-visible { background: white; }
-.benefit-carousel-prev { left: 9px; }
-.benefit-carousel-next { right: 9px; }
-.benefit-copy h2 {
-  font-size: 47px;
-}
-.benefit-list {
-  margin-top: 38px;
+.benefit-slide {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  margin: 0;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: 28px;
+  place-items: center;
+  opacity: 0;
+  transform: scale(1.045);
+  transition: opacity 0.55s ease, transform 0.75s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.benefit-slide.is-active {
+  z-index: 2;
+  opacity: 1;
+  transform: scale(1);
+}
+.benefit-slide img { display: block; width: 76%; height: 86%; object-fit: contain; filter: drop-shadow(0 22px 26px rgba(0, 0, 0, 0.48)); }
+.benefit-copy h2 {
+  max-width: 690px;
+  font-size: clamp(42px, 5.15vw, 76px);
+  line-height: 1.04;
+  letter-spacing: -0.065em;
+}
+.benefit-scroll-layout { display: grid; grid-template-columns: minmax(0, 1fr) 68px; gap: clamp(28px, 5vw, 72px); }
+.benefit-list {
+  margin-top: 58px;
 }
 .benefit-list article {
   display: grid;
-  grid-template-columns: 48px 1fr;
-  gap: 16px;
+  grid-template-columns: 64px minmax(0, 1fr);
+  align-content: center;
+  min-height: 52vh;
+  gap: 20px;
   border-top: 1px solid var(--line);
-  padding: 21px 0;
+  opacity: 0.34;
+  transform: translateX(12px);
+  transition: opacity 0.38s ease, transform 0.42s ease;
+}
+.benefit-list article.is-active {
+  opacity: 1;
+  transform: none;
 }
 .benefit-list b {
   color: var(--coral);
-  font-size: 11px;
+  font: 800 20px/1 "Manrope", sans-serif;
 }
 .benefit-list h3 {
-  font: 800 15px "Manrope";
+  color: #65707d;
+  font: 700 clamp(17px, 1.65vw, 24px)/1.2 "Manrope", sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   margin: 0;
 }
 .benefit-list p {
-  color: var(--muted);
-  margin: 5px 0 0;
-  font-size: 13px;
-  line-height: 1.5;
+  color: #202a35;
+  max-width: 540px;
+  margin: 20px 0 0;
+  font-size: clamp(19px, 2vw, 28px);
+  line-height: 1.32;
 }
+.benefit-pagination {
+  position: sticky;
+  top: 31vh;
+  align-self: start;
+  list-style: none;
+  margin: 58px 0 0;
+  padding: 0 0 0 26px;
+  border-left: 1px solid #aeb4b9;
+}
+.benefit-pagination li { margin: 0 0 24px; }
+.benefit-pagination button {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #7d858d;
+  cursor: pointer;
+  font: 700 17px/1 "Manrope", sans-serif;
+  text-align: left;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+.benefit-pagination button.is-active { color: var(--coral); transform: translateX(6px); }
+.benefit-pagination button:focus-visible { outline: 2px solid var(--coral); outline-offset: 5px; }
 @media (min-width: 901px) {
-  /* Mantém os dois blocos inteiros dentro de uma viewport desktop,
-     sem abandonar o alinhamento vertical central da seção. */
-  .benefits {
-    padding: 56px 0;
-  }
-  .benefits-grid {
-    gap: 64px;
-  }
-  .benefit-carousel {
-    width: min(100%, 330px);
-  }
-  .benefit-copy h2 {
-    font-size: 42px;
-  }
-  .benefit-list {
-    margin-top: 26px;
-    column-gap: 24px;
-  }
-  .benefit-list article {
-    grid-template-columns: 36px 1fr;
-    gap: 12px;
-    padding: 14px 0;
-  }
-  .benefit-list h3 {
-    font-size: 14px;
-  }
-  .benefit-list p {
-    font-size: 12px;
-    line-height: 1.4;
-  }
+  .benefits { padding: 11vh 0 15vh; }
+}
+@media (max-width: 900px) {
+  .benefits-grid { grid-template-columns: 1fr; }
+  .benefit-image { position: relative; top: auto; }
+  .benefit-carousel { width: min(100%, 440px); height: min(72vh, 610px); min-height: 420px; margin: 0 auto; }
+  .benefit-copy { margin-top: 46px; }
+  .benefit-scroll-layout { grid-template-columns: 1fr; }
+  .benefit-list { margin-top: 38px; }
+  .benefit-list article { min-height: 0; padding: 34px 0; opacity: 1; transform: none; }
+  .benefit-pagination { position: static; display: flex; gap: 16px; margin: 10px 0 0; padding: 18px 0 0; border-left: 0; border-top: 1px solid #aeb4b9; overflow-x: auto; }
+  .benefit-pagination li { margin: 0; }
+  .benefit-pagination button { font-size: 14px; }
 }
 .steps {
   background: var(--cream);
@@ -1746,7 +1776,6 @@ footer {
   width: 164px;
 }
 .benefit-image {
-  position: relative;
   overflow: visible;
 }
 
